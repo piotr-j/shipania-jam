@@ -1,4 +1,4 @@
-package io.piotrjastrzebski;
+package io.piotrjastrzebski.psm;
 
 import com.badlogic.gdx.ai.GdxAI;
 import com.badlogic.gdx.ai.msg.MessageDispatcher;

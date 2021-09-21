@@ -18,11 +18,13 @@ allprojects {
 	apply plugin: 'idea'
 }
 
-configure(subprojects - project(':android')) {
+//configure(subprojects - project(':android')) {
+configure(subprojects) {
 	apply plugin: 'java-library'
-	sourceCompatibility = 8.0
+	sourceCompatibility = JavaVersion.VERSION_1_8
+	targetCompatibility = JavaVersion.VERSION_1_8
 	compileJava {
-		options.incremental = true
+//		options.incremental = true
 	}
 }
 

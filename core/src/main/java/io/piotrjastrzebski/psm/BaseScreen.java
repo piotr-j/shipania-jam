@@ -1,4 +1,4 @@
-package io.piotrjastrzebski;
+package io.piotrjastrzebski.psm;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
@@ -15,7 +15,7 @@ import space.earlygrey.shapedrawer.ShapeDrawer;
 
 /** First screen of the application. Displayed after the application is created. */
 public abstract class BaseScreen implements Screen, InputProcessor {
-	protected final SMVApp app;
+	protected final SMApp app;
 	protected final Assets assets;
 	protected final Skin skin;
 	protected final ExtendViewport gameViewport;
@@ -25,11 +25,11 @@ public abstract class BaseScreen implements Screen, InputProcessor {
 	protected final ShapeRenderer renderer;
 	protected final ShapeDrawer drawer;
 
-	public BaseScreen (SMVApp app) {
+	public BaseScreen (SMApp app) {
 		this.app = app;
 		assets = app.assets;
-		gameViewport = new ExtendViewport(SMVApp.WIDTH * SMVApp.INV_SCALE, SMVApp.HEIGHT * SMVApp.INV_SCALE);
-		uiViewport = new ExtendViewport(SMVApp.WIDTH, SMVApp.HEIGHT);
+		gameViewport = new ExtendViewport(SMApp.WIDTH * SMApp.INV_SCALE, SMApp.HEIGHT * SMApp.INV_SCALE);
+		uiViewport = new ExtendViewport(SMApp.WIDTH, SMApp.HEIGHT);
 		batch = app.batch;
 		renderer = app.renderer;
 

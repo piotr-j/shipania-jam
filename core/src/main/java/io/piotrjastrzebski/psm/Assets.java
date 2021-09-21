@@ -1,4 +1,4 @@
-package io.piotrjastrzebski;
+package io.piotrjastrzebski.psm;
 
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.SkinLoader;

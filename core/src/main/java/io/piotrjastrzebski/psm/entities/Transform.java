@@ -1,4 +1,4 @@
-package io.piotrjastrzebski.entities;
+package io.piotrjastrzebski.psm.entities;
 
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;

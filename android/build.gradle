@@ -30,7 +30,7 @@ android {
 		exclude 'META-INF/dependencies.txt'
 	}
 	defaultConfig {
-		applicationId 'io.piotrjastrzebski'
+		applicationId 'io.piotrjastrzebski.psm'
 		minSdkVersion 19
 		targetSdkVersion 25
 		versionCode 1

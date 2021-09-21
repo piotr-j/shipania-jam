@@ -1,9 +1,7 @@
-package io.piotrjastrzebski;
+package io.piotrjastrzebski.psm;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.ai.msg.Telegram;
-import com.badlogic.gdx.ai.msg.Telegraph;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
@@ -11,8 +9,8 @@ import com.esotericsoftware.spine.utils.TwoColorPolygonBatch;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
-public class SMVApp extends Game {
-	protected static final String TAG = SMVApp.class.getSimpleName();
+public class SMApp extends Game {
+	protected static final String TAG = SMApp.class.getSimpleName();
 
 	public final static int WIDTH = 1280;
 	public final static int HEIGHT = 720;
@@ -37,7 +35,7 @@ public class SMVApp extends Game {
 		Events.register(msg -> {
 			Gdx.app.log(TAG, "Assets loaded...");
 			drawer = new ShapeDrawer(batch, assets.skin.getRegion("white"));
-			setScreen(new GameScreen(SMVApp.this));
+			setScreen(new GameScreen(SMApp.this));
 			return false;
 		}, Events.ASSETS_LOADED);
 	}

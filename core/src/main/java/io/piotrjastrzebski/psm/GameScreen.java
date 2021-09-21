@@ -1,4 +1,4 @@
-package io.piotrjastrzebski;
+package io.piotrjastrzebski.psm;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.controllers.Controller;
@@ -9,7 +9,7 @@ public class GameScreen extends BaseScreen {
 
     protected final GameWorld world;
 
-    public GameScreen (SMVApp app) {
+    public GameScreen (SMApp app) {
         super(app);
 
         world = new GameWorld(app, this);

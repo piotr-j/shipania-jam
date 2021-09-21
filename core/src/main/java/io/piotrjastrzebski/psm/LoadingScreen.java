@@ -1,7 +1,7 @@
-package io.piotrjastrzebski;
+package io.piotrjastrzebski.psm;
 
 public class LoadingScreen extends BaseScreen {
-    public LoadingScreen (SMVApp app) {
+    public LoadingScreen (SMApp app) {
         super(app);
     }
 

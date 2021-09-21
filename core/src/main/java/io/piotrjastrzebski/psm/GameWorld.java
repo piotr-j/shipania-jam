@@ -1,15 +1,13 @@
-package io.piotrjastrzebski;
+package io.piotrjastrzebski.psm;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Array;
 import com.esotericsoftware.spine.utils.TwoColorPolygonBatch;
-import io.piotrjastrzebski.entities.BaseEntity;
-import io.piotrjastrzebski.entities.ShipEntity;
+import io.piotrjastrzebski.psm.entities.BaseEntity;
+import io.piotrjastrzebski.psm.entities.ShipEntity;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
 public class GameWorld {
@@ -17,7 +15,7 @@ public class GameWorld {
 
     private final static float WORLD_STEP_TIME = 1/120f;
 
-    protected final SMVApp app;
+    protected final SMApp app;
     protected final GameScreen gameScreen;
     protected final TwoColorPolygonBatch batch;
     protected final ShapeDrawer drawer;
@@ -28,7 +26,7 @@ public class GameWorld {
 
     protected final Array<BaseEntity> entities;
 
-    public GameWorld (SMVApp app, GameScreen gameScreen) {
+    public GameWorld (SMApp app, GameScreen gameScreen) {
         this.app = app;
         this.gameScreen = gameScreen;
         batch = app.batch;
@@ -117,7 +115,10 @@ public class GameWorld {
         }
         batch.end();
 
-        debugRenderer.render(world, batch.getProjectionMatrix());
+        if (false) {
+            debugRenderer.render(world, batch.getProjectionMatrix());
+        }
+
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
             if (player != null) player.kill();

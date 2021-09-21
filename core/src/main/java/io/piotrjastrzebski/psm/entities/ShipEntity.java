@@ -1,4 +1,4 @@
-package io.piotrjastrzebski.entities;
+package io.piotrjastrzebski.psm.entities;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -29,7 +29,9 @@ public class ShipEntity extends BaseEntity {
     public ShipEntity (Body body) {
         super(body);
 
-        // how do we control this cunt?
+        forwardImpulse = 10;
+        rightImpulse = 2;
+
     }
 
     @Override
@@ -39,7 +41,7 @@ public class ShipEntity extends BaseEntity {
         tmp.set(moveForward * forwardImpulse, moveRight * rightImpulse);
         if (!tmp.isZero()) {
             tmp.rotateRad(body.getAngle());
-            body.setLinearVelocity(tmp.x, tmp.y);
+            body.applyForceToCenter(tmp.x, tmp.y, true);
         }
         if (rotateRight != 0) {
             body.applyTorque(-rotateRight * rightImpulse, true);
@@ -79,7 +81,14 @@ public class ShipEntity extends BaseEntity {
     public void drawDebug (ShapeDrawer drawer) {
         super.drawDebug(drawer);
         drawer.setColor(Color.BLUE);
-        drawer.circle(current.x, current.y, .5f, .1f);
+        drawer.filledCircle(current.x, current.y, .5f);
+        tmp.set(1.5f, 0).rotateRad(current.rot);
+        float fx = tmp.x;
+        float fy = tmp.y;
+        tmp.set(0, .45f).rotateRad(current.rot);
+        drawer.line(current.x + tmp.x, current.y + tmp.y, current.x + fx, current.y + fy, .1f);
+        tmp.set(0, -.45f).rotateRad(current.rot);
+        drawer.line(current.x + tmp.x, current.y + tmp.y, current.x + fx, current.y + fy, .1f);
     }
 
     private float deadzone (float axis) {
