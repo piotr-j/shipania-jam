@@ -2,13 +2,17 @@ package io.piotrjastrzebski.psm;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Array;
 import com.esotericsoftware.spine.utils.TwoColorPolygonBatch;
 import io.piotrjastrzebski.psm.entities.BaseEntity;
 import io.piotrjastrzebski.psm.entities.ShipEntity;
+import io.piotrjastrzebski.psm.utils.Utils;
 import space.earlygrey.shapedrawer.ShapeDrawer;
+
+import static com.badlogic.gdx.math.MathUtils.*;
 
 public class GameWorld {
     protected static final String TAG = GameWorld.class.getSimpleName();
@@ -59,8 +63,7 @@ public class GameWorld {
     private void createPlayer () {
         BodyDef def = new BodyDef();
         def.position.set(0, 0);
-        def.angle = 0;
-//        def.angle = MathUtils.PI;
+        def.angle = 90 * MathUtils.degRad;
         def.type = BodyDef.BodyType.DynamicBody;
         def.angularDamping = 1;
         def.linearDamping = 1;

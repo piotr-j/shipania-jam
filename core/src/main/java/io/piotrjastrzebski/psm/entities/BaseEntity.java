@@ -3,6 +3,8 @@ package io.piotrjastrzebski.psm.entities;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.esotericsoftware.spine.utils.TwoColorPolygonBatch;
+import io.piotrjastrzebski.psm.utils.Transform;
+import io.piotrjastrzebski.psm.utils.Utils;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
 public class BaseEntity {
@@ -30,7 +32,7 @@ public class BaseEntity {
     }
 
     public void update (float dt, float alpha) {
-        Transform.interpolate(start, target, alpha, current);
+        Utils.interpolate(start, target, alpha, current);
     }
 
     public void draw (TwoColorPolygonBatch batch) {

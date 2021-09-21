@@ -23,6 +23,7 @@ public class ShipEntity extends BaseEntity {
     // handling
     float forwardImpulse = 5;
     float rightImpulse = 2;
+    float rotateImpulse = 4;
 
     protected Vector2 tmp = new Vector2();
 
@@ -31,12 +32,11 @@ public class ShipEntity extends BaseEntity {
 
         forwardImpulse = 10;
         rightImpulse = 2;
-
+        rotateImpulse = 4;
     }
 
     @Override
     public void fixed () {
-        super.fixed();
         // do we allow strafe? perhaps different strength based on direction
         tmp.set(moveForward * forwardImpulse, moveRight * rightImpulse);
         if (!tmp.isZero()) {
@@ -44,8 +44,9 @@ public class ShipEntity extends BaseEntity {
             body.applyForceToCenter(tmp.x, tmp.y, true);
         }
         if (rotateRight != 0) {
-            body.applyTorque(-rotateRight * rightImpulse, true);
+            body.applyTorque(-rotateRight * rotateImpulse, true);
         }
+        super.fixed();
     }
 
     @Override
@@ -80,15 +81,18 @@ public class ShipEntity extends BaseEntity {
     @Override
     public void drawDebug (ShapeDrawer drawer) {
         super.drawDebug(drawer);
+        float x = current.x();
+        float y = current.x();
+        float angle = current.angle();
         drawer.setColor(Color.BLUE);
-        drawer.filledCircle(current.x, current.y, .5f);
-        tmp.set(1.5f, 0).rotateRad(current.rot);
+        drawer.filledCircle(x, y, .5f);
+        tmp.set(1.5f, 0).rotateRad(current.angle());
         float fx = tmp.x;
         float fy = tmp.y;
-        tmp.set(0, .45f).rotateRad(current.rot);
-        drawer.line(current.x + tmp.x, current.y + tmp.y, current.x + fx, current.y + fy, .1f);
-        tmp.set(0, -.45f).rotateRad(current.rot);
-        drawer.line(current.x + tmp.x, current.y + tmp.y, current.x + fx, current.y + fy, .1f);
+        tmp.set(0, .45f).rotateRad(angle);
+        drawer.line(x + tmp.x, y + tmp.y, x + fx, y + fy, .1f);
+        tmp.set(0, -.45f).rotateRad(angle);
+        drawer.line(x + tmp.x, y + tmp.y, x + fx, y + fy, .1f);
     }
 
     private float deadzone (float axis) {
