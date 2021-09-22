@@ -82,7 +82,7 @@ public class ShipEntity extends BaseEntity {
     public void drawDebug (ShapeDrawer drawer) {
         super.drawDebug(drawer);
         float x = current.x();
-        float y = current.x();
+        float y = current.y();
         float angle = current.angle();
         drawer.setColor(Color.BLUE);
         drawer.filledCircle(x, y, .5f);

@@ -2,6 +2,10 @@ package io.piotrjastrzebski.psm;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import com.badlogic.gdx.maps.tiled.tiles.AnimatedTiledMapTile;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
@@ -23,24 +27,41 @@ public class GameWorld {
     protected final GameScreen gameScreen;
     protected final TwoColorPolygonBatch batch;
     protected final ShapeDrawer drawer;
-
+    protected final OrthographicCamera camera;
 
     protected final World world;
     protected final Box2DDebugRenderer debugRenderer;
 
     protected final Array<BaseEntity> entities;
+    protected final OrthogonalTiledMapRenderer mapRenderer;
+
 
     public GameWorld (SMApp app, GameScreen gameScreen) {
         this.app = app;
         this.gameScreen = gameScreen;
+        camera = (OrthographicCamera)gameScreen.gameViewport.getCamera();
         batch = app.batch;
         drawer = app.drawer;
+
+        TiledMap map = app.assets.manager.get("maps/test.tmx", TiledMap.class);
+        // dont touch batch
+        mapRenderer = new OrthogonalTiledMapRenderer(map, SMApp.INV_SCALE, batch) {
+//            @Override
+//            protected void beginRender () {
+//                AnimatedTiledMapTile.updateAnimationBaseTime();
+//            }
+//
+//            @Override
+//            protected void endRender () {
+//
+//            }
+        };
 
         world = new World(new Vector2(0, 0), true);
         debugRenderer = new Box2DDebugRenderer();
         entities = new Array<>();
 
-        createBounds();
+//        createBounds();
         createPlayer();
     }
 
@@ -62,7 +83,7 @@ public class GameWorld {
     ShipEntity player;
     private void createPlayer () {
         BodyDef def = new BodyDef();
-        def.position.set(0, 0);
+        def.position.set(20, 85);
         def.angle = 90 * MathUtils.degRad;
         def.type = BodyDef.BodyType.DynamicBody;
         def.angularDamping = 1;
@@ -108,6 +129,14 @@ public class GameWorld {
         }
         variableUpdate(dt, accumulator / WORLD_STEP_TIME);
 
+        camera.position.x = player.x();
+        camera.position.y = player.y();
+        camera.update();
+
+        mapRenderer.setView(camera);
+        mapRenderer.render();
+
+        batch.setProjectionMatrix(camera.combined);
         batch.enableBlending();
         batch.begin();
         for (BaseEntity entity : entities) {

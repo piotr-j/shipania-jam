@@ -54,4 +54,14 @@ public class BaseEntity {
     public Body body () {
         return body;
     }
+
+    public float x () {
+        return current.x();
+    }
+    public float y () {
+        return current.y();
+    }
+    public float angle () {
+        return current.angle();
+    }
 }

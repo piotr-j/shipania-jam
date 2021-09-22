@@ -38,7 +38,7 @@ public class GameScreen extends BaseScreen {
         super.render(delta);
 
         gameViewport.apply();
-        batch.setProjectionMatrix(gameViewport.getCamera().projection);
+        batch.setProjectionMatrix(gameViewport.getCamera().combined);
         world.render(delta);
 
         uiViewport.apply();
