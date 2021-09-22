@@ -26,6 +26,8 @@ public class GameMap {
 
     protected final TiledMap map;
     protected final TiledMapTileLayer background;
+    protected final float backgroundParallaxX;
+    protected final float backgroundParallaxY;
     protected final TiledMapTileLayer walls;
     protected final TiledMapTileLayer foreground;
     protected final World world;
@@ -46,6 +48,8 @@ public class GameMap {
 
         MapLayers layers = map.getLayers();
         background = (TiledMapTileLayer)layers.get("background");
+        backgroundParallaxX = background.getProperties().get("parallax-x", 1f, Float.class);
+        backgroundParallaxY = background.getProperties().get("parallax-y", 1f, Float.class);
         walls = (TiledMapTileLayer)layers.get("walls");
         foreground = (TiledMapTileLayer)layers.get("foreground");
 
@@ -153,7 +157,15 @@ public class GameMap {
 
     public void renderBackground (OrthographicCamera camera) {
         mapRenderer.setView(camera);
-        //mapRenderer.render();
+        // we can use offset for parallax
+        // ideally we would match behavior in tiled, so it is easier to preview
+        // or something close at least
+        float cx = camera.position.x;
+        float cy = camera.position.y;
+        float ox = cx - cx * backgroundParallaxX;
+        float oy = cy - cy * backgroundParallaxX;
+        background.setOffsetX(ox * SMApp.SCALE);
+        background.setOffsetY(oy * SMApp.SCALE);
         mapRenderer.renderTileLayer(background);
         mapRenderer.renderTileLayer(walls);
     }
