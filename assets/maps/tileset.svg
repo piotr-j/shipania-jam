@@ -14,9 +14,9 @@
    inkscape:export-filename="C:\DEV\workspace\java\SpaceMetroidVania\assets\maps\test-tileset.png"
    id="svg8"
    version="1.1"
-   viewBox="0 0 135.46666 135.46667"
-   height="512"
-   width="512">
+   viewBox="0 0 51.858331 51.858334"
+   height="196"
+   width="196">
   <defs
      id="defs2" />
   <sodipodi:namedview
@@ -30,9 +30,9 @@
      inkscape:document-rotation="0"
      inkscape:current-layer="layer1"
      inkscape:document-units="px"
-     inkscape:cy="24.783192"
-     inkscape:cx="66.105462"
-     inkscape:zoom="7.71875"
+     inkscape:cy="78.523947"
+     inkscape:cx="51.130186"
+     inkscape:zoom="5.0408163"
      inkscape:pageshadow="2"
      inkscape:pageopacity="0.0"
      borderopacity="1.0"
@@ -61,88 +61,67 @@
      inkscape:groupmode="layer"
      inkscape:label="Layer 1">
     <rect
-       y="124.08958"
-       x="0.26458272"
-       height="11.1125"
-       width="11.1125"
-       id="rect835"
-       style="fill:#333333;stroke-width:0.793751;stroke-linecap:square;paint-order:stroke fill markers" />
+       style="fill:#002d8c;fill-opacity:1;stroke-width:0.831551;stroke-linecap:square;paint-order:stroke fill markers"
+       id="rect835-5-0-4"
+       width="11.641666"
+       height="11.641666"
+       x="0.52916664"
+       y="0.52916664" />
     <rect
-       style="fill:#002d8c;fill-opacity:1;stroke-width:0.793752;stroke-linecap:square;paint-order:stroke fill markers"
-       id="rect835-5"
-       width="11.112499"
-       height="11.112498"
-       x="0.26458332"
-       y="112.97708" />
+       y="0.52916664"
+       x="12.7"
+       height="11.641666"
+       width="11.641666"
+       id="rect835-5-0-4-2"
+       style="fill:#4f270e;fill-opacity:1;stroke-width:0.831551;stroke-linecap:square;paint-order:stroke fill markers" />
     <rect
-       style="fill:#4f270e;fill-opacity:1;stroke-width:0.793752;stroke-linecap:square;paint-order:stroke fill markers"
-       id="rect835-6"
-       width="11.1125"
-       height="11.1125"
-       x="11.377083"
-       y="112.97708" />
+       y="0.52916664"
+       x="24.870832"
+       height="11.641666"
+       width="11.641666"
+       id="rect835-5-0-4-4"
+       style="fill:#1a1a35;fill-opacity:1;stroke-width:0.831551;stroke-linecap:square;paint-order:stroke fill markers" />
     <rect
-       style="fill:#ffcc00;stroke-width:0.793752;stroke-linecap:square;paint-order:stroke fill markers"
-       id="rect835-3"
-       width="11.1125"
-       height="11.1125"
-       x="11.377083"
-       y="124.08958" />
+       y="12.7"
+       x="0.52916664"
+       height="11.641666"
+       width="11.641666"
+       id="rect835-5-0-4-46"
+       style="fill:#333333;fill-opacity:1;stroke-width:0.831551;stroke-linecap:square;paint-order:stroke fill markers" />
     <rect
-       style="fill:#23671d;fill-opacity:1;stroke-width:0.793752;stroke-linecap:square;paint-order:stroke fill markers"
-       id="rect835-8"
-       width="11.1125"
-       height="11.1125"
-       x="22.489584"
-       y="124.08958" />
+       y="12.7"
+       x="12.7"
+       height="11.641666"
+       width="11.641666"
+       id="rect835-5-0-4-22"
+       style="fill:#ffcc00;fill-opacity:1;stroke-width:0.831551;stroke-linecap:square;paint-order:stroke fill markers" />
     <rect
-       style="fill:#1a1a35;fill-opacity:1;stroke-width:0.793752;stroke-linecap:square;paint-order:stroke fill markers"
-       id="rect835-56"
-       width="11.1125"
-       height="11.1125"
-       x="22.489584"
-       y="112.97708" />
+       y="12.7"
+       x="24.870832"
+       height="11.641666"
+       width="11.641666"
+       id="rect835-5-0-4-48"
+       style="fill:#23671d;fill-opacity:1;stroke-width:0.831551;stroke-linecap:square;paint-order:stroke fill markers" />
     <rect
-       style="fill:#333333;stroke-width:0.79375;stroke-linecap:square;paint-order:stroke fill markers"
-       id="rect835-1"
-       width="11.1125"
-       height="11.1125"
-       x="0.26458284"
-       y="11.377079" />
-    <rect
-       y="0.26458332"
-       x="0.26458332"
-       height="11.112498"
-       width="11.112499"
-       id="rect835-5-0"
-       style="fill:#002d8c;fill-opacity:1;stroke-width:0.793753;stroke-linecap:square;paint-order:stroke fill markers" />
-    <rect
-       y="0.26458332"
-       x="11.377083"
-       height="11.1125"
-       width="11.1125"
-       id="rect835-6-2"
-       style="fill:#4f270e;fill-opacity:1;stroke-width:0.793753;stroke-linecap:square;paint-order:stroke fill markers" />
-    <rect
-       y="11.377079"
-       x="11.377083"
-       height="11.1125"
-       width="11.1125"
-       id="rect835-3-1"
-       style="fill:#ffcc00;stroke-width:0.793753;stroke-linecap:square;paint-order:stroke fill markers" />
-    <rect
-       y="11.377079"
-       x="22.489586"
-       height="11.1125"
-       width="11.1125"
-       id="rect835-8-2"
-       style="fill:#23671d;fill-opacity:1;stroke-width:0.793753;stroke-linecap:square;paint-order:stroke fill markers" />
-    <rect
-       y="0.26458332"
-       x="22.489586"
-       height="11.1125"
-       width="11.1125"
-       id="rect835-56-4"
-       style="fill:#1a1a35;fill-opacity:1;stroke-width:0.793753;stroke-linecap:square;paint-order:stroke fill markers" />
+       style="fill:#333333;fill-opacity:1;stroke-width:0.831551;stroke-linecap:square;paint-order:stroke fill markers"
+       id="rect835-5-0-4-46-1"
+       width="11.641666"
+       height="11.641666"
+       x="0.52916664"
+       y="24.870832" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.396875;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 2.6458331,26.458333 2.6458334,1.852084 -1.5875001,2.38125 v 3.704166 L 10.054167,33.3375 8.2020831,31.75 9.5249999,30.427083 7.9374998,28.310417 7.6729165,30.1625 5.0270832,30.691667 7.1437498,26.458333"
+       id="path925-8"
+       sodipodi:nodetypes="ccccccccccc" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.396875;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 8.4666665,34.925 6.3499998,32.014583 2.1166664,31.485417 3.4395831,29.104167"
+       id="path929-3"
+       sodipodi:nodetypes="cccc" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.396875;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 11.1125,26.458333 8.2020831,27.516667 10.31875,28.575"
+       id="path931-8" />
   </g>
 </svg>

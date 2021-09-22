@@ -18,6 +18,7 @@ public class BaseEntity {
 
     public BaseEntity (Body body) {
         this.body = body;
+        body.setUserData(this);
         Vector2 position = body.getPosition();
         start.set(position.x, position.y, body.getAngle());
         target.set(start);

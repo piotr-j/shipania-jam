@@ -31,8 +31,8 @@ public class ShipEntity extends BaseEntity {
         super(body);
 
         forwardImpulse = 10;
-        rightImpulse = 2;
-        rotateImpulse = 4;
+        rightImpulse = 5;
+        rotateImpulse = 30;
     }
 
     @Override
@@ -84,15 +84,25 @@ public class ShipEntity extends BaseEntity {
         float x = current.x();
         float y = current.y();
         float angle = current.angle();
-        drawer.setColor(Color.BLUE);
-        drawer.filledCircle(x, y, .5f);
-        tmp.set(1.5f, 0).rotateRad(current.angle());
+        tmp.set(1, 0).rotateRad(current.angle());
         float fx = tmp.x;
         float fy = tmp.y;
-        tmp.set(0, .45f).rotateRad(angle);
-        drawer.line(x + tmp.x, y + tmp.y, x + fx, y + fy, .1f);
-        tmp.set(0, -.45f).rotateRad(angle);
-        drawer.line(x + tmp.x, y + tmp.y, x + fx, y + fy, .1f);
+
+        drawer.setColor(Color.GOLDENROD);
+        tmp.set(0, .4f).rotateRad(angle);
+        drawer.line(x + tmp.x, y + tmp.y, x + tmp.x + fx * .8f, y + tmp.y + fy * .8f, .2f);
+        tmp.set(0, -.4f).rotateRad(angle);
+        drawer.line(x + tmp.x, y + tmp.y, x + tmp.x + fx * .8f, y + tmp.y + fy * .8f, .2f);
+
+        drawer.setColor(Color.GOLD);
+        drawer.filledCircle(x, y, .5f);
+
+        tmp.set(0, .2f).rotateRad(angle);
+        drawer.setColor(Color.ROYAL);
+        drawer.filledTriangle(
+            x + tmp.x - fx * .2f, y + tmp.y - fy * .2f,
+            x - tmp.x - fx * .2f, y - tmp.y - fy * .2f,
+            x + fx * .3f, y + fy * .3f);
     }
 
     private float deadzone (float axis) {

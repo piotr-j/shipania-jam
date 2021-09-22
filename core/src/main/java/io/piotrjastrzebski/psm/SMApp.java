@@ -53,4 +53,20 @@ public class SMApp extends Game {
 		super.dispose();
 		assets.dispose();
 	}
+
+	public Assets assets () {
+		return assets;
+	}
+
+	public TwoColorPolygonBatch batch () {
+		return batch;
+	}
+
+	public ShapeDrawer drawer () {
+		return drawer;
+	}
+
+	public ShapeRenderer renderer () {
+		return renderer;
+	}
 }

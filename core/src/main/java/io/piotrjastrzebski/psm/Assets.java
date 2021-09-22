@@ -1,17 +1,11 @@
 package io.piotrjastrzebski.psm;
 
-import com.badlogic.gdx.assets.AssetDescriptor;
-import com.badlogic.gdx.assets.AssetLoaderParameters;
 import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.assets.loaders.AssetLoader;
-import com.badlogic.gdx.assets.loaders.SkinLoader;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
-import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.utils.Array;
-import space.earlygrey.shapedrawer.ShapeDrawer;
 
 public class Assets {
     protected final AssetManager manager;
@@ -25,7 +19,13 @@ public class Assets {
         manager = new AssetManager(resolver);
         manager.load("ui/uiskin.json", Skin.class);
         manager.setLoader(TiledMap.class, new TmxMapLoader());
-        manager.load("maps/test.tmx", TiledMap.class);
+        {
+            TmxMapLoader.Parameters parameters = new TmxMapLoader.Parameters();
+            parameters.convertObjectToTileSpace = true;
+            parameters.textureMinFilter = Texture.TextureFilter.Linear;
+            parameters.textureMagFilter = Texture.TextureFilter.Linear;
+            manager.load("maps/test.tmx", TiledMap.class, parameters);
+        }
     }
 
     public boolean update () {
@@ -44,5 +44,9 @@ public class Assets {
 
     public void dispose () {
         manager.dispose();
+    }
+
+    public <T> T get (String fileName, Class<T> type) {
+        return manager.get(fileName, type);
     }
 }
