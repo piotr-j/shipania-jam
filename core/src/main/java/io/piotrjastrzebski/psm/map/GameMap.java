@@ -139,15 +139,18 @@ public class GameMap {
         for (MapObject object : helpers.getObjects()) {
             if (object instanceof RectangleMapObject) {
                 RectangleMapObject mo = (RectangleMapObject)object;
+                Rectangle rect = mo.getRectangle();
+                int x = MathUtils.floor(rect.x);
+                int y = MathUtils.floor(rect.y);
+                int width = MathUtils.ceil(rect.x + rect.width) - x;
+                int height = MathUtils.ceil(rect.y + rect.height) - y;
                 String type = mo.getProperties().get("type", null, String.class);
-                if ("room".equals(type)) {
+                if ("room-reveal".equals(type)) {
                     // add room
-                    Rectangle rect = mo.getRectangle();
-                    int x = MathUtils.floor(rect.x);
-                    int y = MathUtils.floor(rect.y);
-                    int width = MathUtils.ceil(rect.x + rect.width) - x;
-                    int height = MathUtils.ceil(rect.y + rect.height) - y;
-                    GameMapRoom room = new GameMapRoom(world, x, y, width, height);
+                    GameMapRoomReveal room = new GameMapRoomReveal(world, x, y, width, height);
+                    rooms.add(room);
+                } else if ("room-challenge".equals(type)) {
+                    GameMapRoomChallenge room = new GameMapRoomChallenge(world, x, y, width, height);
                     rooms.add(room);
                 }
                 //
@@ -155,11 +158,28 @@ public class GameMap {
             }
             if (object instanceof TiledMapTileMapObject) {
                 TiledMapTileMapObject mo = (TiledMapTileMapObject)object;
-                int playerSpawnId = mo.getProperties().get("playerSpawn", -1, Integer.class);
+                float cx = MathUtils.round(mo.getX()) + .5f;
+                float cy = MathUtils.round(mo.getY()) + .5f;
+                MapProperties props = mo.getProperties();
+                int playerSpawnId = props.get("playerSpawn", -1, Integer.class);
                 if (playerSpawnId >= 0) {
                     // add spawns to some array
-                    playerSpawn.set(MathUtils.round(mo.getX()) + .5f, MathUtils.round(mo.getY()) + .5f);
+                    playerSpawn.set(cx, cy);
                 }
+                String enemyType = props.get("enemy-type", null, String.class);
+                String enemyTier = props.get("enemy-tier", "tier1", String.class);
+                if (enemyType != null) {
+                    world.spawnEnemy(cx, cy, enemyType, enemyTier);
+                    continue;
+                }
+
+                String buffType = props.get("buff-type", null, String.class);
+                String buffTier = props.get("buff-tier", "tier1", String.class);
+                if (buffType != null) {
+                    world.spawnBuff(cx, cy, buffType, buffTier);
+                    continue;
+                }
+
                 continue;
             }
             Gdx.app.log(TAG, "other object: " + object);

@@ -34,4 +34,9 @@ public class Utils {
         return true;
     }
 
+    public static float deadzone (float axis, float deadzone) {
+        if (axis > deadzone) return MathUtils.map(deadzone, 1, 0, 1, axis);
+        if (axis < -deadzone) return MathUtils.map(-deadzone, -1, 0, -1, axis);;
+        return 0;
+    }
 }

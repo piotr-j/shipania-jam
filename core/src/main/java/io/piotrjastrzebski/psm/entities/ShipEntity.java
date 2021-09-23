@@ -43,7 +43,7 @@ public class ShipEntity extends MovableEntity {
     public ShipEntity (GameWorld world, float x, float y, float angle) {
         super(world, x, y, angle);
 
-        health(1000);
+        health(100);
 
         forwardImpulse = 10;
         rightImpulse = 5;
@@ -153,36 +153,7 @@ public class ShipEntity extends MovableEntity {
         super.update(dt, alpha);
 
         firePrimary = fireSecondary = false;
-        // how do we do this in cleaner way?
-        Controller current = Controllers.getCurrent();
-        if (current != null) {
-            ControllerMapping mapping = current.getMapping();
-            moveForward(-deadzone(current.getAxis(mapping.axisLeftY)));
-            moveRight(-deadzone(current.getAxis(mapping.axisLeftX)));
-            rotateRight(deadzone(current.getAxis(mapping.axisRightX)));
-            firePrimary |= current.getButton(mapping.buttonR1);
-            // wonder if this works on gwt :/
-            // ControllerAxis.TRIGGERLEFT = 4
-            // ControllerAxis.TRIGGERRIGHT = 5
-            fireSecondary |= current.getAxis(5) > .5f;
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-            moveForward(1);
-        } else if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-            moveForward(-1);
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-            moveRight(1);
-        } else if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-            moveRight(-1);
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
-            rotateRight(-1);
-        } else if (Gdx.input.isKeyPressed(Input.Keys.E)) {
-            rotateRight(1);
-        }
-        firePrimary |= Gdx.input.isButtonPressed(Input.Buttons.LEFT);
-        fireSecondary |= Gdx.input.isButtonPressed(Input.Buttons.RIGHT);
+
     }
 
     @Override
@@ -210,12 +181,6 @@ public class ShipEntity extends MovableEntity {
             x + tmp.x - fx * .2f, y + tmp.y - fy * .2f,
             x - tmp.x - fx * .2f, y - tmp.y - fy * .2f,
             x + fx * .3f, y + fy * .3f);
-    }
-
-    private float deadzone (float axis) {
-        if (axis > deadzone) return MathUtils.map(deadzone, 1, 0, 1, axis);
-        if (axis < -deadzone) return MathUtils.map(-deadzone, -1, 0, -1, axis);;
-        return 0;
     }
 
     protected void moveForward (float forward) {

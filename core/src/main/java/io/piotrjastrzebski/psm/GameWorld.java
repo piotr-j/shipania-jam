@@ -8,8 +8,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Array;
 import com.esotericsoftware.spine.utils.TwoColorPolygonBatch;
-import io.piotrjastrzebski.psm.entities.BaseEntity;
-import io.piotrjastrzebski.psm.entities.ShipEntity;
+import io.piotrjastrzebski.psm.entities.*;
 import io.piotrjastrzebski.psm.map.GameMap;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
@@ -47,9 +46,8 @@ public class GameWorld {
                 Body bodyB = contact.getFixtureB().getBody();
                 Object dataA = bodyA.getUserData();
                 Object dataB = bodyB.getUserData();
-                // let's make everything an entity
+                // everything should have one of those
                 if (dataA instanceof BaseEntity && dataB instanceof BaseEntity) {
-//                    contact.setEnabled(false);
                     // do we want projectiles to affect bodies? push them back on hit. conditional?
                     BaseEntity eA = (BaseEntity)dataA;
                     BaseEntity eB = (BaseEntity)dataB;
@@ -82,9 +80,9 @@ public class GameWorld {
     }
 
 
-    ShipEntity player;
+    PlayerShipEntity player;
     private void createPlayer () {
-        ShipEntity prevPlayer = player;
+        PlayerShipEntity prevPlayer = player;
 
         float angle = 90 * MathUtils.degRad;
         if (prevPlayer != null) {
@@ -92,7 +90,7 @@ public class GameWorld {
             angle = prevPlayer.angle();
         }
 
-        player = new ShipEntity(this, playerSpawn.x, playerSpawn.y, angle);
+        player = new PlayerShipEntity(this, playerSpawn.x, playerSpawn.y, angle);
 
         if (prevPlayer != null) {
             Body prevBody = prevPlayer.body();
@@ -102,6 +100,18 @@ public class GameWorld {
         }
 
         entities.add(player);
+    }
+
+    public void spawnEnemy (float cx, float cy, String type, String tier) {
+        EnemyShipEntity entity = new EnemyShipEntity(this, cx, cy, MathUtils.random(MathUtils.PI2));
+        entity.health(50);
+        entities.add(entity);
+    }
+
+    public void spawnBuff (float cx, float cy, String type, String tier) {
+        BuffEntity entity = new BuffEntity(this, cx, cy, .75f, .75f);
+        entity.extraHealth = 25;
+        entities.add(entity);
     }
 
     float accumulator;

@@ -18,7 +18,7 @@
  </tile>
  <tile id="3">
   <properties>
-   <property name="type" value="void"/>
+   <property name="type" value="wall"/>
   </properties>
  </tile>
  <tile id="4">
@@ -33,21 +33,20 @@
  </tile>
  <tile id="6">
   <properties>
-   <property name="type" value="wall"/>
-  </properties>
- </tile>
- <tile id="7">
-  <properties>
-   <property name="breakable" value="any"/>
-   <property name="health" type="int" value="100"/>
-   <property name="type" value="wall"/>
+   <property name="buff-tier" value=""/>
+   <property name="buff-type" value=""/>
   </properties>
  </tile>
  <tile id="8">
   <properties>
-   <property name="breakable" value="any"/>
    <property name="health" type="int" value="30"/>
    <property name="type" value="wall"/>
+  </properties>
+ </tile>
+ <tile id="10">
+  <properties>
+   <property name="enemy-tier" value=""/>
+   <property name="enemy-type" value=""/>
   </properties>
  </tile>
 </tileset>
