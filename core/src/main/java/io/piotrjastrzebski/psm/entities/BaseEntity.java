@@ -1,7 +1,9 @@
 package io.piotrjastrzebski.psm.entities;
 
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.Contact;
 import com.esotericsoftware.spine.utils.TwoColorPolygonBatch;
 import io.piotrjastrzebski.psm.GameWorld;
 import io.piotrjastrzebski.psm.utils.Transform;
@@ -9,37 +11,35 @@ import io.piotrjastrzebski.psm.utils.Utils;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
 public abstract class BaseEntity {
+    protected final int id;
     protected final GameWorld world;
     protected static Vector2 tmp = new Vector2();
     protected Body body;
-
-    protected Transform start = new Transform();
-    protected Transform target = new Transform();
     protected Transform current = new Transform();
+    // unbreakable if -1
+    protected int maxHealth = -1;
+    protected int health = -1;
 
     protected boolean pendingRemoval;
 
     public BaseEntity (GameWorld world, float x, float y, float angle) {
         this.world = world;
+        id = world.nextEntityId();
 
         body = createBody(x, y, angle);
         body.setUserData(this);
         Vector2 position = body.getPosition();
-        start.set(position.x, position.y, body.getAngle());
-        target.set(start);
-        current.set(start);
+        current.set(position.x, position.y, body.getAngle());
     }
 
     protected abstract Body createBody (float x, float y, float angle);
 
     public void fixed () {
-        Vector2 position = body.getPosition();
-        target.set(position.x, position.y, body.getAngle());
-        start.set(current);
+
     }
 
     public void update (float dt, float alpha) {
-        Utils.interpolate(start, target, alpha, current);
+
     }
 
     public void draw (TwoColorPolygonBatch batch) {
@@ -65,14 +65,32 @@ public abstract class BaseEntity {
     public float x () {
         return current.x();
     }
+
     public float y () {
         return current.y();
     }
+
     public float angle () {
         return current.angle();
     }
 
-    public void hit (BaseEntity other) {
+    public void hit (BaseEntity other, Contact contact) {
 
+    }
+
+    public void health (int health) {
+        this.health = maxHealth = health;
+    }
+
+    public int health () {
+        return health;
+    }
+
+    public void changeHealth (int amount) {
+        if (health == -1) return;
+        health = MathUtils.clamp(health + amount, 0, maxHealth);
+        if (health <=0) {
+            kill();
+        }
     }
 }

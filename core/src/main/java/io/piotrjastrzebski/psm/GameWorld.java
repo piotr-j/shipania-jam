@@ -9,10 +9,8 @@ import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Array;
 import com.esotericsoftware.spine.utils.TwoColorPolygonBatch;
 import io.piotrjastrzebski.psm.entities.BaseEntity;
-import io.piotrjastrzebski.psm.entities.ProjectileEntity;
 import io.piotrjastrzebski.psm.entities.ShipEntity;
 import io.piotrjastrzebski.psm.map.GameMap;
-import io.piotrjastrzebski.psm.map.GameMapTile;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
 public class GameWorld {
@@ -52,10 +50,11 @@ public class GameWorld {
                 // let's make everything an entity
                 if (dataA instanceof BaseEntity && dataB instanceof BaseEntity) {
 //                    contact.setEnabled(false);
+                    // do we want projectiles to affect bodies? push them back on hit. conditional?
                     BaseEntity eA = (BaseEntity)dataA;
                     BaseEntity eB = (BaseEntity)dataB;
-                    eA.hit(eB);
-                    eB.hit(eB);
+                    eA.hit(eB, contact);
+                    eB.hit(eA, contact);
                 }
             }
 
@@ -77,7 +76,7 @@ public class GameWorld {
         debugRenderer = new Box2DDebugRenderer();
         entities = new Array<>();
 
-        map = new GameMap(app, world);
+        map = new GameMap(app, this);
         playerSpawn.set(map.playerSpawn());
         createPlayer();
     }
@@ -135,7 +134,7 @@ public class GameWorld {
         if (true) map.renderDebug(camera, drawer);
         batch.end();
 
-        if (true) {
+        if (false) {
             debugRenderer.render(world, batch.getProjectionMatrix());
         }
 
@@ -156,6 +155,7 @@ public class GameWorld {
             next.fixed();
             if (next.shouldBeRemoved()) {
                 it.remove();
+                Events.send(Events.ENTITY_KILLED, next);
                 world.destroyBody(next.body());
             }
         }
@@ -174,5 +174,10 @@ public class GameWorld {
 
     public void addEntity (BaseEntity entity) {
         entities.add(entity);
+    }
+
+    private int ids = 0;
+    public int nextEntityId () {
+        return ++ids;
     }
 }

@@ -9,6 +9,7 @@ public class Events {
     private static final MessageDispatcher dispatcher = new MessageDispatcher();
 
     public static final int ASSETS_LOADED = 10000;
+    public static final int ENTITY_KILLED = 10001;
 
 
 

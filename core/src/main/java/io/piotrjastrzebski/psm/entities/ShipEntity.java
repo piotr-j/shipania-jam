@@ -15,7 +15,7 @@ import space.earlygrey.shapedrawer.ShapeDrawer;
 
 import java.util.Date;
 
-public class ShipEntity extends BaseEntity {
+public class ShipEntity extends MovableEntity {
     protected static final String TAG = ShipEntity.class.getSimpleName();
 
     // input
@@ -32,7 +32,7 @@ public class ShipEntity extends BaseEntity {
     // we kinda want Attack or something that can track this crap?
     boolean firePrimary;
     // 3 times per second
-    int firePrimaryCooldown = GameWorld.WORLD_STEPS_PER_SECOND / 3;
+    int firePrimaryCooldown = GameWorld.WORLD_STEPS_PER_SECOND / 6;
     int firePrimaryDelay = 0;
 
     boolean fireSecondary;
@@ -42,6 +42,8 @@ public class ShipEntity extends BaseEntity {
 
     public ShipEntity (GameWorld world, float x, float y, float angle) {
         super(world, x, y, angle);
+
+        health(1000);
 
         forwardImpulse = 10;
         rightImpulse = 5;
@@ -122,6 +124,7 @@ public class ShipEntity extends BaseEntity {
         float fy = y + tmp.y * 1.5f;
 
         // need to pool this crap at some point
+        // friendly fire?
         ProjectileEntity entity = new ProjectileEntity(world, fx, fy, angle);
         // inherit our velocity?
         Vector2 lv = body.getLinearVelocity();

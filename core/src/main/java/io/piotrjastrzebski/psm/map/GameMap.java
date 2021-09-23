@@ -3,7 +3,6 @@ package io.piotrjastrzebski.psm.map;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapLayers;
 import com.badlogic.gdx.maps.MapObject;
@@ -16,8 +15,11 @@ import com.badlogic.gdx.maps.tiled.objects.TiledMapTileMapObject;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.*;
+import io.piotrjastrzebski.psm.Events;
+import io.piotrjastrzebski.psm.GameWorld;
 import io.piotrjastrzebski.psm.SMApp;
+import io.piotrjastrzebski.psm.entities.BaseEntity;
+import io.piotrjastrzebski.psm.entities.WallEntity;
 import io.piotrjastrzebski.psm.utils.Utils;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
@@ -30,7 +32,7 @@ public class GameMap {
     protected final float backgroundParallaxY;
     protected final TiledMapTileLayer walls;
     protected final TiledMapTileLayer foreground;
-    protected final World world;
+    protected final GameWorld world;
     protected final GameMapTile[][] gameTiles;
     protected final OrthogonalTiledMapRenderer mapRenderer;
     protected final int mapWidth;
@@ -39,7 +41,7 @@ public class GameMap {
     // need list
     private Vector2 playerSpawn = new Vector2();
 
-    public GameMap (SMApp app, World world) {
+    public GameMap (SMApp app, GameWorld world) {
 
         map = app.assets().get("maps/test.tmx", TiledMap.class);
         this.world = world;
@@ -58,6 +60,26 @@ public class GameMap {
         gameTiles = new GameMapTile[mapWidth][mapHeight];
 
         processMap();
+
+        Events.register(msg -> {
+            switch (msg.message) {
+            case Events.ENTITY_KILLED: {
+                BaseEntity entity = (BaseEntity)msg.extraInfo;
+                if (entity instanceof WallEntity) {
+                    WallEntity we = (WallEntity)entity;
+                    destroyWallTile(we.tile);
+                }
+            } break;
+            }
+            return false;
+        }, Events.ENTITY_KILLED);
+    }
+
+    private void destroyWallTile (GameMapTile tile) {
+        tile.type = GameMapTileType.EMPTY;
+        tile.entity = null;
+        TiledMapTileLayer.Cell cell = walls.getCell(tile.x, tile.y);
+        cell.setTile(null);
     }
 
     private void processMap () {
@@ -79,6 +101,9 @@ public class GameMap {
 
                 if ("wall".equals(type)) {
                     gt.type = GameMapTileType.WALL;
+                    gt.entity = new WallEntity(world, x + .5f, y + .5f);
+                    gt.entity.tile = gt;
+                    world.addEntity(gt.entity);
                 } else if ("void".equals(type)) {
                     gt.type = GameMapTileType.VOID;
                 } else if ("empty".equals(type)) {
@@ -91,22 +116,18 @@ public class GameMap {
                 // laser,rocket,bump ?
                 String breakable = props.get("breakable", null, String.class);
                 if (health > 0) {
-                    gt.health = health;
-                    gt.breakable = true;
+                    gt.entity.health(health);
                 }
             }
         }
 
-        PolygonShape wallShape = new PolygonShape();
-        wallShape.setAsBox(.5f, .5f);
-        for (int x = 0; x < mapWidth; x++) {
-            for (int y = 0; y < mapHeight; y++) {
-                GameMapTile tile = gameTiles[x][y];
-                if (tile == null || tile.type != GameMapTileType.WALL) continue;
-                createWall(tile, wallShape);
-            }
-        }
-        wallShape.dispose();
+//        for (int x = 0; x < mapWidth; x++) {
+//            for (int y = 0; y < mapHeight; y++) {
+//                GameMapTile tile = gameTiles[x][y];
+//                if (tile == null || tile.type != GameMapTileType.WALL) continue;
+//                tile.entity = new WallEntity(world, tile.x + .5f, tile.y + .5f);
+//            }
+//        }
 
         MapLayers layers = map.getLayers();
         MapLayer helpers = layers.get("helpers");
@@ -131,28 +152,6 @@ public class GameMap {
             }
             Gdx.app.log(TAG, "other object: " + object);
         }
-    }
-
-    private void createWall (GameMapTile tile, PolygonShape wallShape) {
-        BodyDef def = new BodyDef();
-        def.position.set(tile.x + .5f, tile.y + .5f);
-        def.type = BodyDef.BodyType.StaticBody;
-
-        Body body = world.createBody(def);
-        Fixture fixture = body.createFixture(wallShape, 1);
-        fixture.setFriction(0);
-        fixture.setRestitution(.3f);
-        tile.body = body;
-        body.setUserData(tile);
-        Filter filterData = fixture.getFilterData();
-        //filterData.categoryBits
-        fixture.setFilterData(filterData);
-
-        if (tile.health <= 0) {
-            return;
-        }
-
-        // set custom collision filter?
     }
 
     public void renderBackground (OrthographicCamera camera) {
@@ -185,7 +184,7 @@ public class GameMap {
                     switch (tile.type) {
                     case WALL:
                         drawer.setColor(Color.FIREBRICK);
-                        if (tile.breakable) {
+                        if (tile.entity.health() > 0) {
                             drawer.setColor(Color.GREEN);
                         }
                         break;

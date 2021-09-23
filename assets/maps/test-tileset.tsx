@@ -46,7 +46,7 @@
  <tile id="8">
   <properties>
    <property name="breakable" value="any"/>
-   <property name="health" type="int" value="100"/>
+   <property name="health" type="int" value="30"/>
    <property name="type" value="wall"/>
   </properties>
  </tile>

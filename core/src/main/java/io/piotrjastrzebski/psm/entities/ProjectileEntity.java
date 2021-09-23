@@ -1,19 +1,13 @@
 package io.piotrjastrzebski.psm.entities;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.controllers.Controller;
-import com.badlogic.gdx.controllers.ControllerMapping;
-import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import io.piotrjastrzebski.psm.GameWorld;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
-public class ProjectileEntity extends BaseEntity {
+public class ProjectileEntity extends MovableEntity {
     protected static final String TAG = ProjectileEntity.class.getSimpleName();
+    public int damage = 15;
 
     public ProjectileEntity (GameWorld world, float x, float y, float angle) {
         super(world, x, y, angle);
@@ -92,8 +86,10 @@ public class ProjectileEntity extends BaseEntity {
     }
 
     @Override
-    public void hit (BaseEntity other) {
-        super.hit(other);
+    public void hit (BaseEntity other, Contact contact) {
+        super.hit(other, contact);
+        other.changeHealth(-damage);
+        // we might disable contact here if we dont want projectile hits to affect other
         kill();
     }
 }
