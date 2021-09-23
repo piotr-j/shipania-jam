@@ -3,11 +3,13 @@ package io.piotrjastrzebski.psm.entities;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.esotericsoftware.spine.utils.TwoColorPolygonBatch;
+import io.piotrjastrzebski.psm.GameWorld;
 import io.piotrjastrzebski.psm.utils.Transform;
 import io.piotrjastrzebski.psm.utils.Utils;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
-public class BaseEntity {
+public abstract class BaseEntity {
+    protected final GameWorld world;
     protected Body body;
 
     protected Transform start = new Transform();
@@ -16,15 +18,18 @@ public class BaseEntity {
 
     protected boolean pendingRemoval;
 
-    public BaseEntity (Body body) {
-        this.body = body;
+    public BaseEntity (GameWorld world, float x, float y, float angle) {
+        this.world = world;
+
+        body = createBody(x, y, angle);
         body.setUserData(this);
         Vector2 position = body.getPosition();
         start.set(position.x, position.y, body.getAngle());
         target.set(start);
         current.set(start);
-
     }
+
+    protected abstract Body createBody (float x, float y, float angle);
 
     public void fixed () {
         Vector2 position = body.getPosition();

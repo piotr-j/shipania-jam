@@ -8,7 +8,8 @@ import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.*;
+import io.piotrjastrzebski.psm.GameWorld;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
 public class ShipEntity extends BaseEntity {
@@ -27,12 +28,43 @@ public class ShipEntity extends BaseEntity {
 
     protected Vector2 tmp = new Vector2();
 
-    public ShipEntity (Body body) {
-        super(body);
+    public ShipEntity (GameWorld world, float x, float y, float angle) {
+        super(world, x, y, angle);
 
         forwardImpulse = 10;
         rightImpulse = 5;
         rotateImpulse = 30;
+    }
+
+    @Override
+    protected Body createBody (float x, float y, float angle) {
+
+        BodyDef def = new BodyDef();
+        def.position.set(x, y);
+        def.angle = angle;
+        def.type = BodyDef.BodyType.DynamicBody;
+        def.angularDamping = 20;
+        def.linearDamping = 1;
+
+        Body body = world.box2d().createBody(def);
+
+        CircleShape shape = new CircleShape();
+        shape.setRadius(.5f);
+        Fixture fixture = body.createFixture(shape, 1);
+        fixture.setFriction(0);
+        fixture.setRestitution(.3f);
+        Filter filterData = fixture.getFilterData();
+
+        fixture.setFilterData(filterData);
+        shape.dispose();
+
+        // make it simpler to deal with, basically cube data
+        MassData massData = body.getMassData();
+        massData.mass = 1;
+        massData.I = 0.16666667f;
+        body.setMassData(massData);
+
+        return body;
     }
 
     @Override

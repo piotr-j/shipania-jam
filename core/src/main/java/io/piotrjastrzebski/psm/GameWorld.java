@@ -84,45 +84,23 @@ public class GameWorld {
 
     ShipEntity player;
     private void createPlayer () {
-        BodyDef def = new BodyDef();
-        def.position.set(playerSpawn.x, playerSpawn.y);
-        def.angle = 90 * MathUtils.degRad;
-        def.type = BodyDef.BodyType.DynamicBody;
-        def.angularDamping = 20;
-        def.linearDamping = 1;
+        ShipEntity prevPlayer = player;
 
-        if (player != null) {
-            Body oldBody = player.body();
-            Vector2 position = oldBody.getPosition();
-            def.position.set(position.x, position.y);
-            def.angle = oldBody.getAngle();
+        float angle = 90 * MathUtils.degRad;
+        if (prevPlayer != null) {
+            playerSpawn.set(prevPlayer.x(), prevPlayer.y());
+            angle = prevPlayer.angle();
         }
 
-        Body body = world.createBody(def);
+        player = new ShipEntity(this, playerSpawn.x, playerSpawn.y, angle);
 
-        CircleShape shape = new CircleShape();
-        shape.setRadius(.5f);
-        Fixture fixture = body.createFixture(shape, 1);
-        fixture.setFriction(0);
-        fixture.setRestitution(.3f);
-        Filter filterData = fixture.getFilterData();
-
-        fixture.setFilterData(filterData);
-        shape.dispose();
-
-        // make it simpler to deal with, basically cube data
-        MassData massData = body.getMassData();
-        massData.mass = 1;
-        massData.I = 0.16666667f;
-        body.setMassData(massData);
-
-        if (player != null) {
-            Body oldBody = player.body();
-            body.setLinearVelocity(oldBody.getLinearVelocity());
-            body.setAngularVelocity(oldBody.getAngularVelocity());
+        if (prevPlayer != null) {
+            Body prevBody = prevPlayer.body();
+            Body body = player.body();
+            body.setLinearVelocity(prevBody.getLinearVelocity());
+            body.setAngularVelocity(prevBody.getAngularVelocity());
         }
 
-        player = new ShipEntity(body);
         entities.add(player);
     }
 
@@ -161,7 +139,8 @@ public class GameWorld {
         }
 
 
-        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F1)) {
+            Gdx.app.log(TAG, "Recreate player");
             if (player != null) player.kill();
             createPlayer();
         }
@@ -186,5 +165,9 @@ public class GameWorld {
         for (BaseEntity entity : entities) {
             entity.update(dt, alpha);
         }
+    }
+
+    public World box2d () {
+        return world;
     }
 }
