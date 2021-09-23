@@ -188,20 +188,6 @@ public class GameMap {
         findEmptyTiles((int)playerSpawn.x, (int)playerSpawn.y);
     }
 
-    private void updateRooms () {
-        for (GameMapRoom room : rooms) {
-            int sx = (int)room.bounds.x;
-            int sy = (int)room.bounds.y;
-            int width = (int)room.bounds.width;
-            int height = (int)room.bounds.height;
-            for (int x = sx; x < width; x++) {
-                for (int y = sy; y < height; y++) {
-
-                }
-            }
-        }
-    }
-
     private void findEmptyTiles (int x, int y) {
         Queue<GridPoint2> tiles = new Queue<>();
         tiles.addLast(new GridPoint2(x, y));

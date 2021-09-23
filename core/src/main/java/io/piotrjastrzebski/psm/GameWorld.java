@@ -136,15 +136,15 @@ public class GameWorld {
         for (BaseEntity entity : entities) {
             entity.draw(batch);
         }
-        map.renderForeground(camera);
 
         for (BaseEntity entity : entities) {
             entity.drawDebug(drawer);
         }
-        if (true) map.renderDebug(camera, drawer);
+        if (false) map.renderDebug(camera, drawer);
+        map.renderForeground(camera);
         batch.end();
 
-        if (true) {
+        if (false) {
             debugRenderer.render(world, batch.getProjectionMatrix());
         }
 
