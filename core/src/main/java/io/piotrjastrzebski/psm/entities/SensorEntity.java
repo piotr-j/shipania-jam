@@ -6,7 +6,7 @@ import io.piotrjastrzebski.psm.map.GameMapRoom;
 import io.piotrjastrzebski.psm.map.GameMapTile;
 
 public class SensorEntity extends BaseEntity {
-    public GameMapRoom room;
+    public SensorListener listener;
 
     public SensorEntity (GameWorld world, float x, float y, float width, float height) {
         super(world, x + width/2, y + height/2, 0);
@@ -35,6 +35,10 @@ public class SensorEntity extends BaseEntity {
 
     @Override
     public void hit (BaseEntity other, Contact contact) {
-        room.hit(other);
+        if (listener != null) listener.hit(other, contact);
+    }
+
+    public interface SensorListener {
+        void hit (BaseEntity other, Contact contact);
     }
 }

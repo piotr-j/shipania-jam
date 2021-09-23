@@ -1,13 +1,14 @@
 package io.piotrjastrzebski.psm.map;
 
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.utils.Array;
 import io.piotrjastrzebski.psm.GameWorld;
 import io.piotrjastrzebski.psm.entities.BaseEntity;
 import io.piotrjastrzebski.psm.entities.SensorEntity;
 import io.piotrjastrzebski.psm.entities.ShipEntity;
 
-public class GameMapRoom {
+public class GameMapRoom implements SensorEntity.SensorListener {
     GameWorld world;
     boolean revealed = false;
     Rectangle bounds;
@@ -19,18 +20,8 @@ public class GameMapRoom {
         bounds = new Rectangle(x, y, width, height);
         tiles = new Array<>();
         sensor = new SensorEntity(world, x, y, width, height);
-        sensor.room = this;
+        sensor.listener = this;
         world.addEntity(sensor);
-    }
-
-    public void hit (BaseEntity other) {
-        if (revealed) return;
-        if (!(other instanceof ShipEntity)) {
-            return;
-        }
-
-        ShipEntity shipEntity = (ShipEntity)other;
-        reveal();
     }
 
     private void reveal () {
@@ -49,10 +40,21 @@ public class GameMapRoom {
                 case VOID: break;
                 case EMPTY:
                 case WALL:
-                    map.fadeForeground(sx + x, sy + y);
+                    map.revealTile(sx + x, sy + y);
                     break;
                 }
             }
         }
+    }
+
+    @Override
+    public void hit (BaseEntity other, Contact contact) {
+        if (revealed) return;
+        if (!(other instanceof ShipEntity)) {
+            return;
+        }
+
+        ShipEntity shipEntity = (ShipEntity)other;
+        reveal();
     }
 }

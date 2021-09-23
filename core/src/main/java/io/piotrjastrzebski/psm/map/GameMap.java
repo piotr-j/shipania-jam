@@ -284,10 +284,10 @@ public class GameMap {
         return gameTiles[x][y];
     }
 
-    public void fadeForeground (int x, int y) {
+    public void revealTile (int x, int y) {
         TiledMapTileLayer.Cell cell = foreground.getCell(x, y);
         if (cell == null) return;
-        // TODO fade of sort
+        // TODO fade of sort, some sort of animated tile? cant tint stuff on per tile basis it seams
         cell.setTile(null);
     }
 }
