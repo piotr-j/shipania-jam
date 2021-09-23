@@ -10,6 +10,7 @@ import space.earlygrey.shapedrawer.ShapeDrawer;
 
 public abstract class BaseEntity {
     protected final GameWorld world;
+    protected static Vector2 tmp = new Vector2();
     protected Body body;
 
     protected Transform start = new Transform();
@@ -69,5 +70,9 @@ public abstract class BaseEntity {
     }
     public float angle () {
         return current.angle();
+    }
+
+    public void hit (BaseEntity other) {
+
     }
 }

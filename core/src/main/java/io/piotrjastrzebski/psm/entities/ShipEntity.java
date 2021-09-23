@@ -9,8 +9,11 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.utils.Array;
 import io.piotrjastrzebski.psm.GameWorld;
 import space.earlygrey.shapedrawer.ShapeDrawer;
+
+import java.util.Date;
 
 public class ShipEntity extends BaseEntity {
     protected static final String TAG = ShipEntity.class.getSimpleName();
@@ -26,7 +29,16 @@ public class ShipEntity extends BaseEntity {
     float rightImpulse = 2;
     float rotateImpulse = 4;
 
-    protected Vector2 tmp = new Vector2();
+    // we kinda want Attack or something that can track this crap?
+    boolean firePrimary;
+    // 3 times per second
+    int firePrimaryCooldown = GameWorld.WORLD_STEPS_PER_SECOND / 3;
+    int firePrimaryDelay = 0;
+
+    boolean fireSecondary;
+    // 1 times per second
+    int fireSecondaryCooldown = GameWorld.WORLD_STEPS_PER_SECOND / 1;
+    int fireSecondaryDelay = 0;
 
     public ShipEntity (GameWorld world, float x, float y, float angle) {
         super(world, x, y, angle);
@@ -79,12 +91,65 @@ public class ShipEntity extends BaseEntity {
             body.applyTorque(-rotateRight * rotateImpulse, true);
         }
         super.fixed();
+
+        // priority? do we allow to fire both at same time?
+        // use some sort of resource for secondary?
+        if (firePrimaryDelay > 0) {
+            firePrimaryDelay --;
+        }
+        if (firePrimary && firePrimaryDelay <= 0) {
+            firePrimaryDelay = firePrimaryCooldown;
+            firePrimary();
+        }
+        if (fireSecondaryDelay > 0) {
+            fireSecondaryDelay --;
+        }
+        if (fireSecondary && fireSecondaryDelay <= 0) {
+            fireSecondaryDelay = fireSecondaryCooldown;
+            fireSecondary();
+        }
+    }
+
+    private void firePrimary () {
+        // small fast
+        Gdx.app.log(TAG, "prim!");
+
+        float x = target.x();
+        float y = target.y();
+        float angle = target.angle();
+        tmp.set(1, 0).rotateRad(angle);
+        float fx = x + tmp.x * 1.5f;
+        float fy = y + tmp.y * 1.5f;
+
+        // need to pool this crap at some point
+        ProjectileEntity entity = new ProjectileEntity(world, fx, fy, angle);
+        // inherit our velocity?
+        Vector2 lv = body.getLinearVelocity();
+        float pvx = tmp.x * 20 + lv.x;
+        float pvy = tmp.y * 20 + lv.y;
+        entity.body.setLinearVelocity(pvx, pvy);
+
+        for (Fixture fixture : entity.body.getFixtureList()) {
+            Filter filter = fixture.getFilterData();
+
+            fixture.setFilterData(filter);
+        }
+
+        world.addEntity(entity);
+
+
+    }
+
+    private void fireSecondary () {
+        // large slow, charge? hold fire for a bit to charge up, dealing more damage or whatever
+        Gdx.app.log(TAG, "sec!");
     }
 
     @Override
     public void update (float dt, float alpha) {
         super.update(dt, alpha);
 
+        firePrimary = fireSecondary = false;
         // how do we do this in cleaner way?
         Controller current = Controllers.getCurrent();
         if (current != null) {
@@ -92,6 +157,11 @@ public class ShipEntity extends BaseEntity {
             moveForward(-deadzone(current.getAxis(mapping.axisLeftY)));
             moveRight(-deadzone(current.getAxis(mapping.axisLeftX)));
             rotateRight(deadzone(current.getAxis(mapping.axisRightX)));
+            firePrimary |= current.getButton(mapping.buttonR1);
+            // wonder if this works on gwt :/
+            // ControllerAxis.TRIGGERLEFT = 4
+            // ControllerAxis.TRIGGERRIGHT = 5
+            fireSecondary |= current.getAxis(5) > .5f;
         }
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
             moveForward(1);
@@ -108,6 +178,8 @@ public class ShipEntity extends BaseEntity {
         } else if (Gdx.input.isKeyPressed(Input.Keys.E)) {
             rotateRight(1);
         }
+        firePrimary |= Gdx.input.isButtonPressed(Input.Buttons.LEFT);
+        fireSecondary |= Gdx.input.isButtonPressed(Input.Buttons.RIGHT);
     }
 
     @Override

@@ -2,34 +2,24 @@ package io.piotrjastrzebski.psm;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.maps.MapLayer;
-import com.badlogic.gdx.maps.MapLayers;
-import com.badlogic.gdx.maps.MapObject;
-import com.badlogic.gdx.maps.MapProperties;
-import com.badlogic.gdx.maps.objects.RectangleMapObject;
-import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.badlogic.gdx.maps.tiled.TiledMapTile;
-import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
-import com.badlogic.gdx.maps.tiled.objects.TiledMapTileMapObject;
-import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Array;
 import com.esotericsoftware.spine.utils.TwoColorPolygonBatch;
 import io.piotrjastrzebski.psm.entities.BaseEntity;
+import io.piotrjastrzebski.psm.entities.ProjectileEntity;
 import io.piotrjastrzebski.psm.entities.ShipEntity;
 import io.piotrjastrzebski.psm.map.GameMap;
 import io.piotrjastrzebski.psm.map.GameMapTile;
-import io.piotrjastrzebski.psm.map.GameMapTileType;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
 public class GameWorld {
     protected static final String TAG = GameWorld.class.getSimpleName();
 
-    private final static float WORLD_STEP_TIME = 1/120f;
+    public final static int WORLD_STEPS_PER_SECOND = 120;
+    public final static float WORLD_STEP_TIME = 1f/ WORLD_STEPS_PER_SECOND;
 
     protected final SMApp app;
     protected final GameScreen gameScreen;
@@ -55,7 +45,18 @@ public class GameWorld {
         world.setContactListener(new ContactListener() {
             @Override
             public void beginContact (Contact contact) {
-
+                Body bodyA = contact.getFixtureA().getBody();
+                Body bodyB = contact.getFixtureB().getBody();
+                Object dataA = bodyA.getUserData();
+                Object dataB = bodyB.getUserData();
+                // let's make everything an entity
+                if (dataA instanceof BaseEntity && dataB instanceof BaseEntity) {
+//                    contact.setEnabled(false);
+                    BaseEntity eA = (BaseEntity)dataA;
+                    BaseEntity eB = (BaseEntity)dataB;
+                    eA.hit(eB);
+                    eB.hit(eB);
+                }
             }
 
             @Override
@@ -134,7 +135,7 @@ public class GameWorld {
         if (true) map.renderDebug(camera, drawer);
         batch.end();
 
-        if (false) {
+        if (true) {
             debugRenderer.render(world, batch.getProjectionMatrix());
         }
 
@@ -169,5 +170,9 @@ public class GameWorld {
 
     public World box2d () {
         return world;
+    }
+
+    public void addEntity (BaseEntity entity) {
+        entities.add(entity);
     }
 }
