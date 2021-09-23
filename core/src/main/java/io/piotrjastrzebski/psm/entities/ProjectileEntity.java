@@ -88,6 +88,8 @@ public class ProjectileEntity extends MovableEntity {
     @Override
     public void hit (BaseEntity other, Contact contact) {
         super.hit(other, contact);
+        // isHittable?
+        if (other instanceof SensorEntity) return;
         other.changeHealth(-damage);
         // we might disable contact here if we dont want projectile hits to affect other
         kill();

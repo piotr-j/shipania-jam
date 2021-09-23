@@ -13,8 +13,11 @@ import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.objects.TiledMapTileMapObject;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.*;
 import io.piotrjastrzebski.psm.Events;
 import io.piotrjastrzebski.psm.GameWorld;
 import io.piotrjastrzebski.psm.SMApp;
@@ -37,6 +40,8 @@ public class GameMap {
     protected final OrthogonalTiledMapRenderer mapRenderer;
     protected final int mapWidth;
     protected final int mapHeight;
+
+    protected final Array<GameMapRoom> rooms = new Array<>();
 
     // need list
     private Vector2 playerSpawn = new Vector2();
@@ -88,8 +93,8 @@ public class GameMap {
 
         foreground.setOpacity(1);
 
-        for (int x = 0; x < walls.getWidth(); x++) {
-            for (int y = 0; y < walls.getHeight(); y++) {
+        for (int x = 0; x < mapWidth; x++) {
+            for (int y = 0; y < mapHeight; y++) {
                 TiledMapTileLayer.Cell cell = walls.getCell(x, y);
                 if (cell == null) continue;
                 TiledMapTile tile = cell.getTile();
@@ -137,6 +142,13 @@ public class GameMap {
                 String type = mo.getProperties().get("type", null, String.class);
                 if ("room".equals(type)) {
                     // add room
+                    Rectangle rect = mo.getRectangle();
+                    int x = MathUtils.floor(rect.x);
+                    int y = MathUtils.floor(rect.y);
+                    int width = MathUtils.ceil(rect.x + rect.width) - x;
+                    int height = MathUtils.ceil(rect.y + rect.height) - y;
+                    GameMapRoom room = new GameMapRoom(world, x, y, width, height);
+                    rooms.add(room);
                 }
                 //
                 continue;
@@ -151,6 +163,61 @@ public class GameMap {
                 continue;
             }
             Gdx.app.log(TAG, "other object: " + object);
+        }
+
+        findEmptyTiles((int)playerSpawn.x, (int)playerSpawn.y);
+    }
+
+    private void updateRooms () {
+        for (GameMapRoom room : rooms) {
+            int sx = (int)room.bounds.x;
+            int sy = (int)room.bounds.y;
+            int width = (int)room.bounds.width;
+            int height = (int)room.bounds.height;
+            for (int x = sx; x < width; x++) {
+                for (int y = sy; y < height; y++) {
+
+                }
+            }
+        }
+    }
+
+    private void findEmptyTiles (int x, int y) {
+        Queue<GridPoint2> tiles = new Queue<>();
+        tiles.addLast(new GridPoint2(x, y));
+        ObjectSet<GridPoint2> visited = new ObjectSet<>();
+        while (tiles.size > 0) {
+            GridPoint2 gp = tiles.removeFirst();
+            visited.add(gp);
+            if (gp.x < 0 || gp.y < 0 || gp.x >= mapWidth || gp.y >= mapHeight) continue;
+            GameMapTile tile = gameTiles[gp.x][gp.y];
+            if (tile == null) {
+                tile = new GameMapTile(gp.x, gp.y);
+                tile.type = GameMapTileType.EMPTY;
+                gameTiles[tile.x][tile.y] = tile;
+            } else if (tile.type == GameMapTileType.WALL && tile.entity.health() == -1) {
+                // dont skip breakable walls
+                continue;
+            } else if (tile.type == GameMapTileType.EMPTY) {
+                // already visited
+                continue;
+            }
+            {
+                GridPoint2 ngp = new GridPoint2(tile.x + 1, tile.y);
+                if (!visited.contains(ngp)) tiles.addLast(ngp);
+            }
+            {
+                GridPoint2 ngp = new GridPoint2(tile.x - 1, tile.y);
+                if (!visited.contains(ngp)) tiles.addLast(ngp);
+            }
+            {
+                GridPoint2 ngp = new GridPoint2(tile.x, tile.y + 1);
+                if (!visited.contains(ngp)) tiles.addLast(ngp);
+            }
+            {
+                GridPoint2 ngp = new GridPoint2(tile.x, tile.y - 1);
+                if (!visited.contains(ngp)) tiles.addLast(ngp);
+            }
         }
     }
 
@@ -179,7 +246,7 @@ public class GameMap {
             for (int y = 0; y < mapHeight; y++) {
                 if (!Utils.visible(camera, x + .5f, y + .5f)) continue;
                 GameMapTile tile = gameTiles[x][y];
-                drawer.setColor(Color.BLACK);
+                drawer.setColor(Color.WHITE);
                 if (tile != null) {
                     switch (tile.type) {
                     case WALL:
@@ -192,7 +259,7 @@ public class GameMap {
                         drawer.setColor(Color.NAVY);
                         break;
                     case VOID:
-                        drawer.setColor(Color.BLACK);
+                        drawer.setColor(Color.WHITE);
                         break;
                     default:
                         drawer.setColor(Color.MAGENTA);
@@ -201,9 +268,26 @@ public class GameMap {
                 drawer.filledRectangle(x + .45f, y + .45f, .1f, .1f);
             }
         }
+
+        for (GameMapRoom room : rooms) {
+            drawer.setColor(Color.ORANGE);
+            drawer.rectangle(room.bounds, .1f);
+        }
     }
 
     public Vector2 playerSpawn () {
         return playerSpawn;
+    }
+
+    public GameMapTile tileAt (int x, int y) {
+        if (x < 0 || y < 0 || x >= mapWidth || y >= mapHeight) return null;
+        return gameTiles[x][y];
+    }
+
+    public void fadeForeground (int x, int y) {
+        TiledMapTileLayer.Cell cell = foreground.getCell(x, y);
+        if (cell == null) return;
+        // TODO fade of sort
+        cell.setTile(null);
     }
 }

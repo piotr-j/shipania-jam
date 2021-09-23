@@ -18,10 +18,10 @@ public class WallEntity extends BaseEntity {
         def.angle = angle;
         def.type = BodyDef.BodyType.StaticBody;
 
+        Body body = world.box2d().createBody(def);
 
         PolygonShape wallShape = new PolygonShape();
         wallShape.setAsBox(.5f, .5f);
-        Body body = world.box2d().createBody(def);
         Fixture fixture = body.createFixture(wallShape, 1);
         fixture.setFriction(0);
         fixture.setRestitution(.3f);

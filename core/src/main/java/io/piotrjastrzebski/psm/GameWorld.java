@@ -134,7 +134,7 @@ public class GameWorld {
         if (true) map.renderDebug(camera, drawer);
         batch.end();
 
-        if (false) {
+        if (true) {
             debugRenderer.render(world, batch.getProjectionMatrix());
         }
 
@@ -179,5 +179,9 @@ public class GameWorld {
     private int ids = 0;
     public int nextEntityId () {
         return ++ids;
+    }
+
+    public GameMap map () {
+        return map;
     }
 }
