@@ -1,8 +1,12 @@
 package io.piotrjastrzebski.psm.map;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.ai.pfa.Connection;
+import com.badlogic.gdx.ai.msg.Telegram;
+import com.badlogic.gdx.ai.msg.Telegraph;
+import com.badlogic.gdx.ai.pfa.*;
+import com.badlogic.gdx.ai.pfa.indexed.IndexedAStarPathFinder;
 import com.badlogic.gdx.ai.pfa.indexed.IndexedGraph;
+import com.badlogic.gdx.ai.sched.LoadBalancingScheduler;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.maps.MapLayer;
@@ -23,13 +27,13 @@ import com.badlogic.gdx.utils.*;
 import io.piotrjastrzebski.psm.Events;
 import io.piotrjastrzebski.psm.GameWorld;
 import io.piotrjastrzebski.psm.SMApp;
-import io.piotrjastrzebski.psm.entities.BaseEntity;
-import io.piotrjastrzebski.psm.entities.WallEntity;
+import io.piotrjastrzebski.psm.entities.*;
 import io.piotrjastrzebski.psm.utils.Utils;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
-public class GameMap implements IndexedGraph<GameMapTile> {
+public class GameMap implements IndexedGraph<GameMapTile>, Telegraph {
     protected static final String TAG = GameMap.class.getSimpleName();
+
 
     protected final TiledMap map;
     protected final TiledMapTileLayer background;
@@ -46,6 +50,10 @@ public class GameMap implements IndexedGraph<GameMapTile> {
 
 
     protected final Array<GameMapRoom> rooms = new Array<>();
+
+    protected final IndexedAStarPathFinder<GameMapTile> pathFinder;
+    protected final LoadBalancingScheduler scheduler;
+    protected final PathSmoother<GameMapTile, Vector2> pathSmoother;
 
     // need list
     private Vector2 playerSpawn = new Vector2();
@@ -69,6 +77,19 @@ public class GameMap implements IndexedGraph<GameMapTile> {
         gameTiles = new GameMapTile[mapWidth][mapHeight];
 
         processMap();
+
+
+        pathFinder = new IndexedAStarPathFinder<>(this, true);
+
+        PathFinderQueue<GameMapTile> pathFinderQueue = new PathFinderQueue<>(pathFinder);
+        Events.register(pathFinderQueue, Events.PF_REQUEST);
+
+        scheduler = new LoadBalancingScheduler(100);
+        scheduler.add(pathFinderQueue, 1, 0);
+
+        pathSmoother = new PathSmoother<GameMapTile, Vector2>(new GameMapPathSmoother(this));
+
+//        MessageManager.getInstance().addListener(pathFinderQueue, PF_REQUEST);
 
         Events.register(msg -> {
             switch (msg.message) {
@@ -358,8 +379,16 @@ public class GameMap implements IndexedGraph<GameMapTile> {
         }
     }
 
+    public void update (float dt) {
+        scheduler.run(TimeUtils.millisToNanos(3));
+    }
+
     public Vector2 playerSpawn () {
         return playerSpawn;
+    }
+
+    private GameMapTile tileAt (float x, float y) {
+        return tileAt(MathUtils.floor(x), MathUtils.floor(y));
     }
 
     public GameMapTile tileAt (int x, int y) {
@@ -372,6 +401,36 @@ public class GameMap implements IndexedGraph<GameMapTile> {
         if (cell == null) return;
         // TODO fade of sort, some sort of animated tile? cant tint stuff on per tile basis it seams
         cell.setTile(null);
+    }
+
+
+    Heuristic<GameMapTile> heuristic = (node, endNode) -> Vector2.dst(node.x, node.y, endNode.x, endNode.y);
+    public void findPathToPlayer (EnemyShipEntity entity) {
+        PathRequest pfRequest = new PathRequest();
+        pfRequest.pathSmoother = pathSmoother;
+        pfRequest.sender = entity;
+        pfRequest.target = world.player();
+        pfRequest.startNode = tileAt(entity.x(), entity.y());
+        pfRequest.endNode = tileAt(world.player().x(), world.player().y());
+        pfRequest.heuristic = heuristic;
+        pfRequest.responseMessageCode = Events.PF_RESPONSE;
+        Events.send(this, Events.PF_REQUEST, pfRequest);
+    }
+
+    @Override
+    public boolean handleMessage (Telegram msg) {
+        switch (msg.message) {
+        case Events.PF_RESPONSE: // PathFinderQueue will call us directly, no need to register for this message
+            PathRequest pfr = (PathRequest)msg.extraInfo;
+            if (pfr.pathFound) {
+                //Gdx.app.log(TAG, "found path!");
+                pfr.sender.path(pfr.resultPath);
+            } else {
+                Gdx.app.debug(TAG, "not found path!");
+            }
+            break;
+        }
+        return false;
     }
 
     @Override
@@ -388,4 +447,5 @@ public class GameMap implements IndexedGraph<GameMapTile> {
     public Array<Connection<GameMapTile>> getConnections (GameMapTile fromNode) {
         return fromNode.connections;
     }
+
 }

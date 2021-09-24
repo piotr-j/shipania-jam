@@ -1,11 +1,13 @@
 package io.piotrjastrzebski.psm.entities;
 
+import com.badlogic.gdx.ai.pfa.GraphPath;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Contact;
 import com.esotericsoftware.spine.utils.TwoColorPolygonBatch;
 import io.piotrjastrzebski.psm.GameWorld;
+import io.piotrjastrzebski.psm.map.GameMapTile;
 import io.piotrjastrzebski.psm.utils.Transform;
 import io.piotrjastrzebski.psm.utils.Utils;
 import space.earlygrey.shapedrawer.ShapeDrawer;

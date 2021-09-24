@@ -10,6 +10,8 @@ public class Events {
 
     public static final int ASSETS_LOADED = 10000;
     public static final int ENTITY_KILLED = 10001;
+    public final static int PF_REQUEST = 10005;
+    public final static int PF_RESPONSE = 10006;
 
 
 

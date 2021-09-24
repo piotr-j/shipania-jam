@@ -176,6 +176,7 @@ public class GameWorld {
         for (BaseEntity entity : entities) {
             entity.update(dt, alpha);
         }
+        map.update(dt);
     }
 
     public World box2d () {
@@ -197,5 +198,9 @@ public class GameWorld {
 
     public OrthographicCamera camera () {
         return camera;
+    }
+
+    public PlayerShipEntity player () {
+        return player;
     }
 }

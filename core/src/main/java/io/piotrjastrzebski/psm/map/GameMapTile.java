@@ -47,4 +47,12 @@ public class GameMapTile {
     public String toString () {
         return "GameMapTile{" + "x=" + x + ", y=" + y + ", type=" + type + ", connections=" + connections + '}';
     }
+
+    public float cx () {
+        return x + .5f;
+    }
+
+    public float cy () {
+        return y + .5f;
+    }
 }
