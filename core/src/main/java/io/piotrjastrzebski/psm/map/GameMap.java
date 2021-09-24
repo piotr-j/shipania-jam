@@ -1,6 +1,8 @@
 package io.piotrjastrzebski.psm.map;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.ai.pfa.Connection;
+import com.badlogic.gdx.ai.pfa.indexed.IndexedGraph;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.maps.MapLayer;
@@ -26,7 +28,7 @@ import io.piotrjastrzebski.psm.entities.WallEntity;
 import io.piotrjastrzebski.psm.utils.Utils;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
-public class GameMap {
+public class GameMap implements IndexedGraph<GameMapTile> {
     protected static final String TAG = GameMap.class.getSimpleName();
 
     protected final TiledMap map;
@@ -40,6 +42,8 @@ public class GameMap {
     protected final OrthogonalTiledMapRenderer mapRenderer;
     protected final int mapWidth;
     protected final int mapHeight;
+
+
 
     protected final Array<GameMapRoom> rooms = new Array<>();
 
@@ -85,6 +89,8 @@ public class GameMap {
         tile.entity = null;
         TiledMapTileLayer.Cell cell = walls.getCell(tile.x, tile.y);
         cell.setTile(null);
+
+        addConnections(tile, true);
     }
 
     private void processMap () {
@@ -99,7 +105,7 @@ public class GameMap {
                 if (cell == null) continue;
                 TiledMapTile tile = cell.getTile();
                 if (tile == null) continue;
-                GameMapTile gt = new GameMapTile(x, y);
+                GameMapTile gt = new GameMapTile(x + y * mapWidth, x, y);
                 gameTiles[x][y] = gt;
                 MapProperties props = tile.getProperties();
                 String type = props.get("type", null, String.class);
@@ -186,6 +192,7 @@ public class GameMap {
         }
 
         findEmptyTiles((int)playerSpawn.x, (int)playerSpawn.y);
+        addConnections();
     }
 
     private void findEmptyTiles (int x, int y) {
@@ -198,7 +205,7 @@ public class GameMap {
             if (gp.x < 0 || gp.y < 0 || gp.x >= mapWidth || gp.y >= mapHeight) continue;
             GameMapTile tile = gameTiles[gp.x][gp.y];
             if (tile == null) {
-                tile = new GameMapTile(gp.x, gp.y);
+                tile = new GameMapTile(gp.x + gp.y * mapWidth, gp.x, gp.y);
                 tile.type = GameMapTileType.EMPTY;
                 gameTiles[tile.x][tile.y] = tile;
             } else if (tile.type == GameMapTileType.WALL && tile.entity.health() == -1) {
@@ -227,6 +234,50 @@ public class GameMap {
         }
     }
 
+    private void addConnections () {
+        for (int x = 0; x < mapWidth; x++) {
+            for (int y = 0; y < mapHeight; y++) {
+                GameMapTile tile = tileAt(x, y);
+                if (tile == null || tile.type != GameMapTileType.EMPTY) continue;
+                addConnections(tile, false);
+            }
+        }
+    }
+
+    private void addConnections (GameMapTile from, boolean bidirectional) {
+        int x = from.x;
+        int y = from.y;
+        for (int ox = -1; ox <= 1; ox++) {
+            for (int oy = -1; oy <= 1; oy++) {
+                if (ox == 0 && oy == 0) continue;
+                GameMapTile other = tileAt(x + ox, y + oy);
+                if (other == null || other.type != GameMapTileType.EMPTY) continue;
+                if (ox != 0 && oy != 0) {
+                    // check corners
+                    if (!isWalkable(x + ox, y)) continue;
+                    if (!isWalkable(x, y + oy)) continue;
+                }
+                float cost = Vector2.dst(x, y, x + ox, y + oy);
+                from.add(new GameMapTileConnection(from, other, cost));
+                from.add(new GameMapTileConnection(from, other, cost));
+                if (bidirectional) {
+                    other.add(new GameMapTileConnection(other, from, cost));
+                    other.add(new GameMapTileConnection(other, from, cost));
+                    addConnections(other, false);
+                }
+            }
+        }
+    }
+
+    private boolean isWalkable (int x, int y) {
+        GameMapTile tile = tileAt(x, y);
+        return tile != null && tile.type == GameMapTileType.EMPTY;
+    }
+
+    private void removeConnections (GameMapTile from) {
+
+    }
+
     public void renderBackground (OrthographicCamera camera) {
         mapRenderer.setView(camera);
         // we can use offset for parallax
@@ -247,37 +298,63 @@ public class GameMap {
         mapRenderer.renderTileLayer(foreground);
     }
 
+    private Vector2 v2 = new Vector2();
     public void renderDebug (OrthographicCamera camera, ShapeDrawer drawer) {
-        for (int x = 0; x < mapWidth; x++) {
-            for (int y = 0; y < mapHeight; y++) {
-                if (!Utils.visible(camera, x + .5f, y + .5f)) continue;
-                GameMapTile tile = gameTiles[x][y];
-                drawer.setColor(Color.WHITE);
-                if (tile != null) {
-                    switch (tile.type) {
-                    case WALL:
-                        drawer.setColor(Color.FIREBRICK);
-                        if (tile.entity.health() > 0) {
-                            drawer.setColor(Color.GREEN);
+        if (false) {
+            for (int x = 0; x < mapWidth; x++) {
+                for (int y = 0; y < mapHeight; y++) {
+                    if (!Utils.visible(camera, x + .5f, y + .5f)) continue;
+                    GameMapTile tile = gameTiles[x][y];
+                    drawer.setColor(Color.WHITE);
+                    if (tile != null) {
+                        switch (tile.type) {
+                        case WALL:
+                            drawer.setColor(Color.FIREBRICK);
+                            if (tile.entity.health() > 0) {
+                                drawer.setColor(Color.GREEN);
+                            }
+                            break;
+                        case EMPTY:
+                            drawer.setColor(Color.NAVY);
+                            break;
+                        case VOID:
+                            drawer.setColor(Color.WHITE);
+                            break;
+                        default:
+                            drawer.setColor(Color.MAGENTA);
                         }
-                        break;
-                    case EMPTY:
-                        drawer.setColor(Color.NAVY);
-                        break;
-                    case VOID:
-                        drawer.setColor(Color.WHITE);
-                        break;
-                    default:
-                        drawer.setColor(Color.MAGENTA);
                     }
+                    drawer.filledRectangle(x + .45f, y + .45f, .1f, .1f);
                 }
-                drawer.filledRectangle(x + .45f, y + .45f, .1f, .1f);
             }
         }
 
-        for (GameMapRoom room : rooms) {
-            drawer.setColor(Color.ORANGE);
-            drawer.rectangle(room.bounds, .1f);
+        if (false) {
+            for (GameMapRoom room : rooms) {
+                drawer.setColor(Color.ORANGE);
+                drawer.rectangle(room.bounds, .1f);
+            }
+        }
+        if (false) {
+            for (int x = 0; x < mapWidth; x++) {
+                for (int y = 0; y < mapHeight; y++) {
+                    if (!Utils.visible(camera, x + .5f, y + .5f)) continue;
+                    GameMapTile tile = gameTiles[x][y];
+                    if (tile == null) continue;
+                    drawer.setColor(1, 1, 1, .1f);
+                    drawer.rectangle(x, y, 1, 1, .05f);
+                    for (Connection<GameMapTile> c : tile.connections) {
+                        GameMapTileConnection connection = (GameMapTileConnection)c;
+                        if (connection.cost <= 1) {
+                            drawer.setColor(0, 1, 0, .7f);
+                        } else {
+                            drawer.setColor(1, 1, 0, .7f);
+                        }
+                        v2.set(connection.to.x + .5f, connection.to.y + .5f).sub(tile.x + .5f, tile.y + .5f).nor().scl(.35f);
+                        drawer.line(tile.x + .5f, tile.y + .5f, tile.x + .5f + v2.x, tile.y + .5f + v2.y, .05f);
+                    }
+                }
+            }
         }
     }
 
@@ -295,5 +372,20 @@ public class GameMap {
         if (cell == null) return;
         // TODO fade of sort, some sort of animated tile? cant tint stuff on per tile basis it seams
         cell.setTile(null);
+    }
+
+    @Override
+    public int getIndex (GameMapTile node) {
+        return node.index;
+    }
+
+    @Override
+    public int getNodeCount () {
+        return mapWidth * mapHeight;
+    }
+
+    @Override
+    public Array<Connection<GameMapTile>> getConnections (GameMapTile fromNode) {
+        return fromNode.connections;
     }
 }

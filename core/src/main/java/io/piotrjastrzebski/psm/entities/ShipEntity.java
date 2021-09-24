@@ -81,11 +81,9 @@ public class ShipEntity extends MovableEntity {
 
     @Override
     public void fixed () {
-        // do we allow strafe? perhaps different strength based on direction
-        tmp.set(moveForward * forwardImpulse, moveRight * rightImpulse);
-        float angle = Utils.sanitizeAngle(body.getAngle());
         // do we do this after super.fixed()?
         if (!lookAt.isZero()) {
+            float angle = Utils.sanitizeAngle(body.getAngle());
             float targetAngle = Utils.sanitizeAngle(lookAt.angleRad());
             // this helps with body oscillating when reaching target
             float nextAngle = angle + body.getAngularVelocity() / GameWorld.WORLD_STEPS_PER_SECOND;
@@ -98,8 +96,10 @@ public class ShipEntity extends MovableEntity {
             float torque = body.getInertia() * desiredAngularVelocity / GameWorld.WORLD_STEP_TIME;
             body.applyTorque(torque, true);
         }
+        // do we allow strafe? perhaps different strength based on direction
+        tmp.set(moveForward * forwardImpulse, moveRight * rightImpulse);
         if (!tmp.isZero()) {
-            tmp.rotateRad(angle);
+            tmp.rotateRad(Utils.sanitizeAngle(body.getAngle()));
             body.applyForceToCenter(tmp.x, tmp.y, true);
         }
         super.fixed();

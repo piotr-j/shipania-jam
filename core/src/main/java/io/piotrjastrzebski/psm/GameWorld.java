@@ -140,7 +140,7 @@ public class GameWorld {
         for (BaseEntity entity : entities) {
             entity.drawDebug(drawer);
         }
-        if (false) map.renderDebug(camera, drawer);
+        if (true) map.renderDebug(camera, drawer);
         map.renderForeground(camera);
         batch.end();
 
