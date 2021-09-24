@@ -9,6 +9,22 @@ public class EnemyShipEntity extends ShipEntity {
         super(world, x, y, angle);
     }
 
+    @Override
+    public void update (float dt, float alpha) {
+        super.update(dt, alpha);
+
+        // so we kinda want to attack the player
+        // pathfinding will likely be needed, as straight path to player would likely fail
+        // can we add a sensor fixture to body to detect player?
+        // stuff to do:
+        // detect nearby player, sensor?
+        // find a path to player location
+        //      need to build proper graph, no point for hierarchical
+        //      we have GameMapTile in all relevant places, we can use them
+        //      once we have that, make them seek player by following the path
+        //      ideally we want to use same api as player, eg by setting steering left/right/rotate
+        //
+    }
 
     @Override
     public void drawDebug (ShapeDrawer drawer) {

@@ -194,4 +194,8 @@ public class GameWorld {
     public GameMap map () {
         return map;
     }
+
+    public OrthographicCamera camera () {
+        return camera;
+    }
 }

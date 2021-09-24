@@ -1,19 +1,16 @@
 package io.piotrjastrzebski.psm.entities;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.controllers.Controller;
-import com.badlogic.gdx.controllers.ControllerMapping;
-import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
-import com.badlogic.gdx.utils.Array;
 import io.piotrjastrzebski.psm.GameWorld;
+import io.piotrjastrzebski.psm.utils.Utils;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
-import java.util.Date;
+import static com.badlogic.gdx.math.MathUtils.PI;
+import static com.badlogic.gdx.math.MathUtils.PI2;
 
 public class ShipEntity extends MovableEntity {
     protected static final String TAG = ShipEntity.class.getSimpleName();
@@ -22,12 +19,11 @@ public class ShipEntity extends MovableEntity {
     protected float moveForward;
     protected float moveRight;
     protected float rotateRight;
-    protected float deadzone = .1f;
 
     // handling
     float forwardImpulse = 5;
     float rightImpulse = 2;
-    float rotateImpulse = 4;
+    float maxAngularVelocity = 180 * MathUtils.degRad;
 
     // we kinda want Attack or something that can track this crap?
     boolean firePrimary;
@@ -40,6 +36,9 @@ public class ShipEntity extends MovableEntity {
     int fireSecondaryCooldown = GameWorld.WORLD_STEPS_PER_SECOND / 1;
     int fireSecondaryDelay = 0;
 
+    // direction
+    Vector2 lookAt = new Vector2();
+
     public ShipEntity (GameWorld world, float x, float y, float angle) {
         super(world, x, y, angle);
 
@@ -47,7 +46,6 @@ public class ShipEntity extends MovableEntity {
 
         forwardImpulse = 10;
         rightImpulse = 5;
-        rotateImpulse = 30;
     }
 
     @Override
@@ -85,12 +83,24 @@ public class ShipEntity extends MovableEntity {
     public void fixed () {
         // do we allow strafe? perhaps different strength based on direction
         tmp.set(moveForward * forwardImpulse, moveRight * rightImpulse);
-        if (!tmp.isZero()) {
-            tmp.rotateRad(body.getAngle());
-            body.applyForceToCenter(tmp.x, tmp.y, true);
+        float angle = Utils.sanitizeAngle(body.getAngle());
+        // do we do this after super.fixed()?
+        if (!lookAt.isZero()) {
+            float targetAngle = Utils.sanitizeAngle(lookAt.angleRad());
+            // this helps with body oscillating when reaching target
+            float nextAngle = angle + body.getAngularVelocity() / GameWorld.WORLD_STEPS_PER_SECOND;
+            // from MathUtils.lerpAngle, get shorter direction
+            float delta = ((targetAngle - nextAngle + PI2 + PI) % PI2) - PI;
+            float desiredAngularVelocity = delta * GameWorld.WORLD_STEPS_PER_SECOND;
+
+            desiredAngularVelocity = Math.min(maxAngularVelocity, Math.max(-maxAngularVelocity, desiredAngularVelocity));
+
+            float torque = body.getInertia() * desiredAngularVelocity / GameWorld.WORLD_STEP_TIME;
+            body.applyTorque(torque, true);
         }
-        if (rotateRight != 0) {
-            body.applyTorque(-rotateRight * rotateImpulse, true);
+        if (!tmp.isZero()) {
+            tmp.rotateRad(angle);
+            body.applyForceToCenter(tmp.x, tmp.y, true);
         }
         super.fixed();
 
@@ -181,6 +191,11 @@ public class ShipEntity extends MovableEntity {
             x + tmp.x - fx * .2f, y + tmp.y - fy * .2f,
             x - tmp.x - fx * .2f, y - tmp.y - fy * .2f,
             x + fx * .3f, y + fy * .3f);
+
+        drawer.setColor(Color.CYAN);
+        if (!lookAt.isZero() && false) {
+            drawer.line(x, y, x + lookAt.x * 2, y + lookAt.y * 2, .1f);
+        }
     }
 
     protected void moveForward (float forward) {
