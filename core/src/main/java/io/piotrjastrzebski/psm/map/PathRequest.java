@@ -33,10 +33,10 @@ class PathRequest extends PathFinderRequest<GameMapTile> implements Pool.Poolabl
 
     @Override
     public boolean finalizeSearch (long timeToRun) {
-        if (pathFound  && !smoothFinished) {
-            smoothFinished = pathSmoother.smoothPath(pathSmootherRequest, timeToRun);
-            return smoothFinished;
-        }
+//        if (pathFound  && !smoothFinished) {
+//            smoothFinished = pathSmoother.smoothPath(pathSmootherRequest, timeToRun);
+//            return smoothFinished;
+//        }
         return true;
     }
 

@@ -97,8 +97,10 @@ public class ShipEntity extends MovableEntity {
             body.applyTorque(torque, true);
         }
         // do we allow strafe? perhaps different strength based on direction
-        tmp.set(moveForward * forwardImpulse, moveRight * rightImpulse);
+        tmp.set(moveForward, moveRight).limit2(1);
         if (!tmp.isZero()) {
+            tmp.x *= forwardImpulse;
+            tmp.y *= rightImpulse;
             tmp.rotateRad(Utils.sanitizeAngle(body.getAngle()));
             body.applyForceToCenter(tmp.x, tmp.y, true);
         }
