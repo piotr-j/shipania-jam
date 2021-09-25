@@ -4,6 +4,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Contact;
+import com.badlogic.gdx.physics.box2d.World;
 import com.esotericsoftware.spine.utils.TwoColorPolygonBatch;
 import io.piotrjastrzebski.psm.GameWorld;
 import io.piotrjastrzebski.psm.utils.Transform;
@@ -85,11 +86,30 @@ public abstract class BaseEntity {
         return health;
     }
 
+    public int maxHealth () {
+        return maxHealth;
+    }
+
     public void changeHealth (int amount) {
         if (health == -1) return;
         health = MathUtils.clamp(health + amount, 0, maxHealth);
         if (health <=0) {
             kill();
+        }
+    }
+
+    public boolean isAlive () {
+        return !pendingRemoval;
+    }
+
+    public boolean isValid () {
+        return body != null;
+    }
+
+    public void destroy (World world) {
+        if (body != null) {
+            world.destroyBody(body);
+            body = null;
         }
     }
 }

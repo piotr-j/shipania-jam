@@ -196,7 +196,7 @@ public class GameMap implements IndexedGraph<GameMapTile>, Telegraph {
                 String enemyType = props.get("enemy-type", null, String.class);
                 String enemyTier = props.get("enemy-tier", "tier1", String.class);
                 if (enemyType != null) {
-                    world.spawnEnemy(cx, cy, enemyType, enemyTier);
+                    world.addEnemySpawn(cx, cy, enemyType, enemyTier);
                     continue;
                 }
 
