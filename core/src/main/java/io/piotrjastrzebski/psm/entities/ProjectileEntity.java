@@ -1,6 +1,7 @@
 package io.piotrjastrzebski.psm.entities;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import io.piotrjastrzebski.psm.GameWorld;
 import space.earlygrey.shapedrawer.ShapeDrawer;
@@ -29,7 +30,8 @@ public class ProjectileEntity extends MovableEntity {
 
         PolygonShape shape = new PolygonShape();
         shape.setAsBox(.25f, .05f);
-        Fixture fixture = body.createFixture(shape, 1);
+        // we want higher density so they push target a bit
+        Fixture fixture = body.createFixture(shape, 3);
         fixture.setFriction(0);
         fixture.setRestitution(.3f);
 //        fixture.setSensor(true);
@@ -37,13 +39,6 @@ public class ProjectileEntity extends MovableEntity {
 
         fixture.setFilterData(filterData);
         shape.dispose();
-
-        // make it simpler to deal with, basically cube data
-        MassData massData = body.getMassData();
-        massData.mass = 1;
-        massData.I = 0.16666667f;
-        body.setMassData(massData);
-
         return body;
     }
 
@@ -59,7 +54,6 @@ public class ProjectileEntity extends MovableEntity {
         super.drawDebug(drawer);
         float x = current.x();
         float y = current.y();
-        float angle = current.angle();
         tmp.set(1, 0).rotateRad(current.angle());
         float fx = tmp.x * .25f;
         float fy = tmp.y * .25f;
@@ -91,7 +85,7 @@ public class ProjectileEntity extends MovableEntity {
         // isHittable?
         if (other instanceof SensorEntity) return;
         other.changeHealth(-damage);
-        // we might disable contact here if we dont want projectile hits to affect other
+        // optional? based on weapon?
         kill();
     }
 }
