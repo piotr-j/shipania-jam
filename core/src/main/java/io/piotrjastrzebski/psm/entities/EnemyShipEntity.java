@@ -1,8 +1,12 @@
 package io.piotrjastrzebski.psm.entities;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.pfa.GraphPath;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.Fixture;
+import com.badlogic.gdx.physics.box2d.RayCastCallback;
 import io.piotrjastrzebski.psm.GameWorld;
 import io.piotrjastrzebski.psm.map.GameMapTile;
 import space.earlygrey.shapedrawer.ShapeDrawer;
@@ -19,10 +23,13 @@ public class EnemyShipEntity extends ShipEntity {
     float stopRange = 5;
     float attackRange = 8;
 
+    float losTimer;
     float repathTimer;
     float fireTimer;
     float fireDuration = 1;
     float fireCooldown = 2;
+    boolean hasLoS;
+    boolean hasAggro;
     @Override
     public void update (float dt, float alpha) {
         super.update(dt, alpha);
@@ -43,6 +50,18 @@ public class EnemyShipEntity extends ShipEntity {
         firePrimary = false;
         float dstToPlayer = Vector2.dst(x(), y(), player.x(), player.y());
         if (dstToPlayer <= aggroRange) {
+            if (losTimer > 0) {
+                losTimer -= dt;
+            } else {
+                losTimer = .25f;
+                checkLoS(player);
+            }
+            if (!hasAggro) {
+                hasAggro = hasLoS;
+                if (!hasAggro) {
+                    return;
+                }
+            }
             if (repathTimer > 0) {
                 repathTimer -= dt;
             } else {
@@ -75,6 +94,30 @@ public class EnemyShipEntity extends ShipEntity {
             if (fireTimer >= fireCooldown) {
                 firePrimary = true;
             }
+        }
+    }
+
+    BaseEntity closestHit;
+    float closestFraction;
+    public void checkLoS (PlayerShipEntity player) {
+        hasLoS = false;
+        closestHit = null;
+        closestFraction = 1;
+        world.box2d().rayCast((fixture, point, normal, fraction) -> {
+            // ignore sensors (projectiles)
+            if (fixture.isSensor()) return -1;
+
+            Body body = fixture.getBody();
+            BaseEntity data = (BaseEntity)body.getUserData();
+            if (fraction < closestFraction) {
+                closestHit = data;
+                closestFraction = fraction;
+            }
+            return 1;
+        }, x(), y(), player.x(), player.y());
+
+        if (closestHit instanceof PlayerShipEntity) {
+            hasLoS = true;
         }
     }
 
