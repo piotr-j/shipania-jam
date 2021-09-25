@@ -8,10 +8,18 @@ import com.badlogic.gdx.ai.msg.Telegraph;
 public class Events {
     private static final MessageDispatcher dispatcher = new MessageDispatcher();
 
-    public static final int ASSETS_LOADED = 10000;
+    public static final int ASSETS_LOADED = 9000;
+
+    public static final int ENTITY_SPAWNED = 10000;
     public static final int ENTITY_KILLED = 10001;
-    public final static int PF_REQUEST = 10005;
-    public final static int PF_RESPONSE = 10006;
+    public static final int PLAYER_SPAWNED = 10002;
+    public static final int PLAYER_KILLED = 10003;
+    public static final int PLAYER_HP_CHANGED = 10004;
+
+    public static final int GAME_RESTART_REQUEST = 10100;
+
+    public final static int PF_REQUEST = 20000;
+    public final static int PF_RESPONSE = 20001;
 
 
 

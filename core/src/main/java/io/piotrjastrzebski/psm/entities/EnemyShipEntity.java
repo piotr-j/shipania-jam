@@ -134,6 +134,7 @@ public class EnemyShipEntity extends ShipEntity {
         drawer.circle(current.x(), current.y(), .49f, .1f);
 
         if (!(followPath != null && followPath.getCount() > 0 && followPath.getCount() < maxFollowPathLength)) return;
+        if (true) return;
         drawer.setColor(Color.YELLOW);
         GameMapTile first = followPath.get(0);
         drawer.line(x(), y(), first.cx(), first.cy(), .05f);

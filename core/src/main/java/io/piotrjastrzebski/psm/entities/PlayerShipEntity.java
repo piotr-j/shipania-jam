@@ -7,6 +7,7 @@ import com.badlogic.gdx.controllers.ControllerMapping;
 import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector3;
+import io.piotrjastrzebski.psm.Events;
 import io.piotrjastrzebski.psm.GameWorld;
 import io.piotrjastrzebski.psm.utils.Utils;
 import space.earlygrey.shapedrawer.ShapeDrawer;
@@ -78,5 +79,11 @@ public class PlayerShipEntity extends ShipEntity {
         drawer.setColor(Color.TEAL);
         drawer.circle(current.x(), current.y(), .49f, .1f);
 
+    }
+
+    @Override
+    public void changeHealth (int amount) {
+        super.changeHealth(amount);
+        Events.send(Events.PLAYER_HP_CHANGED, this);
     }
 }

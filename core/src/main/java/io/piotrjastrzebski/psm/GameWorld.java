@@ -12,6 +12,7 @@ import com.badlogic.gdx.utils.Array;
 import com.esotericsoftware.spine.utils.TwoColorPolygonBatch;
 import io.piotrjastrzebski.psm.entities.*;
 import io.piotrjastrzebski.psm.map.GameMap;
+import io.piotrjastrzebski.psm.utils.Async;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
 public class GameWorld implements Telegraph {
@@ -80,9 +81,9 @@ public class GameWorld implements Telegraph {
 
         map = new GameMap(app, this);
         playerSpawn.set(map.playerSpawn());
-        spawnPlayer();
-        spawnEnemies();
-        Events.register(this, Events.ENTITY_KILLED);
+//        spawnPlayer();
+//        spawnEnemies();
+        Events.register(this, Events.GAME_RESTART_REQUEST, Events.PLAYER_KILLED);
     }
 
 
@@ -111,6 +112,7 @@ public class GameWorld implements Telegraph {
         }
 
         entities.add(player);
+        Events.send(Events.PLAYER_SPAWNED, player);
     }
 
     public void addEnemySpawn (float cx, float cy, String type, String tier) {
@@ -140,8 +142,13 @@ public class GameWorld implements Telegraph {
         }
         variableUpdate(dt, accumulator / WORLD_STEP_TIME);
 
-        camera.position.x = player.x();
-        camera.position.y = player.y();
+        if (player != null) {
+            camera.position.x = player.x();
+            camera.position.y = player.y();
+        } else {
+            camera.position.x = playerSpawn.x;
+            camera.position.y = playerSpawn.y;
+        }
         camera.update();
 
         batch.setProjectionMatrix(camera.combined);
@@ -163,13 +170,6 @@ public class GameWorld implements Telegraph {
         if (false) {
             debugRenderer.render(world, batch.getProjectionMatrix());
         }
-
-
-        if (Gdx.input.isKeyJustPressed(Input.Keys.F1)) {
-            Gdx.app.log(TAG, "Recreate player");
-            if (player != null) player.kill();
-            spawnPlayer();
-        }
     }
 
     private void fixedUpdate () {
@@ -182,6 +182,9 @@ public class GameWorld implements Telegraph {
             if (next.shouldBeRemoved()) {
                 it.remove();
                 Events.send(Events.ENTITY_KILLED, next);
+                if (next instanceof PlayerShipEntity) {
+                    Events.send(Events.PLAYER_KILLED, next);
+                }
                 next.destroy(world);
             }
         }
@@ -189,11 +192,6 @@ public class GameWorld implements Telegraph {
 
     private void variableUpdate (float dt, float alpha) {
         //Gdx.app.log(TAG, "Variable update");
-        if (player == null) {
-            spawnEnemies();
-            spawnPlayer();
-        }
-
         for (BaseEntity entity : entities) {
             entity.update(dt, alpha);
         }
@@ -228,11 +226,17 @@ public class GameWorld implements Telegraph {
     @Override
     public boolean handleMessage (Telegram msg) {
         switch (msg.message) {
-        case Events.ENTITY_KILLED: {
-            BaseEntity entity = (BaseEntity)msg.extraInfo;
-            if (entity instanceof PlayerShipEntity) {
-                player = null;
+        case Events.GAME_RESTART_REQUEST: {
+            if (player == null) {
+                spawnPlayer();
+                spawnEnemies();
             }
+        } break;
+        case Events.PLAYER_KILLED: {
+            Async.ui(() -> {
+                spawnPlayer();
+                spawnEnemies();
+            }, 2);
         } break;
         }
         return false;

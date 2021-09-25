@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.esotericsoftware.spine.utils.TwoColorPolygonBatch;
+import io.piotrjastrzebski.psm.utils.Async;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
@@ -22,8 +23,11 @@ public class SMApp extends Game {
 	ShapeRenderer renderer;
 	ShapeDrawer drawer;
 
+	Async async;
+
 	@Override
 	public void create() {
+		async = new Async();
 		assets = new Assets();
 		batch = new TwoColorPolygonBatch();
 		renderer = new ShapeRenderer();
@@ -52,6 +56,7 @@ public class SMApp extends Game {
 	public void dispose () {
 		super.dispose();
 		assets.dispose();
+		async.dispose();
 	}
 
 	public Assets assets () {
