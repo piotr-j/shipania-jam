@@ -1,11 +1,9 @@
 package io.piotrjastrzebski.psm.entities;
 
-import box2dLight.ChainLight;
 import box2dLight.Light;
 import box2dLight.PointLight;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.physics.box2d.*;
 import io.piotrjastrzebski.psm.GameWorld;

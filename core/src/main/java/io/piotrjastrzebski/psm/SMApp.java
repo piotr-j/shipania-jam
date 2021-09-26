@@ -49,6 +49,7 @@ public class SMApp extends Game {
 		float dt = MathUtils.clamp(Gdx.graphics.getDeltaTime(), 1/90f, 1/20f);
 		if (screen != null) screen.render(dt);
 		batch.setColor(Color.WHITE);
+		Async.update(dt);
 		Events.update(dt);
 	}
 

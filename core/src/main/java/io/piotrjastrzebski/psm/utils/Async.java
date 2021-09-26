@@ -1,10 +1,10 @@
 package io.piotrjastrzebski.psm.utils;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.utils.Array;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 public class Async {
     protected static final String TAG = Async.class.getSimpleName();
@@ -21,19 +21,25 @@ public class Async {
         instance = this;
     }
 
+    public static void update (float dt) {
+        instance.process(dt);
+    }
+
+    Array<PendingRunnable> pendingRunnables = new Array<>();
+    private void process (float dt) {
+        Array.ArrayIterator<PendingRunnable> it = pendingRunnables.iterator();
+        while (it.hasNext()) {
+            PendingRunnable next = it.next();
+            next.remainingDelay -= dt;
+            if (next.remainingDelay <= 0) {
+                next.runnable.run();
+                it.remove();
+            }
+        }
+    }
+
     public void dispose () {
         executor.shutdownNow();
-    }
-
-
-    public static void background (Runnable runnable) {
-        instance.executor.submit(wrap(runnable, "bg"));
-    }
-
-    public static void background (Runnable runnable, float delay) {
-        int millis = (int) (delay * 1000);
-        Runnable wrapped = wrap(runnable, "bg");
-        instance.executor.schedule(wrapped, millis, TimeUnit.MILLISECONDS);
     }
 
     public static void ui (Runnable runnable) {
@@ -41,9 +47,22 @@ public class Async {
     }
 
     public static void ui (Runnable runnable, float delay) {
-        int millis = (int) (delay * 1000);
         Runnable wrapped = wrap(runnable, "ui");
-        instance.executor.schedule(() -> Gdx.app.postRunnable(wrapped), millis, TimeUnit.MILLISECONDS);
+        instance.runLater(() -> Gdx.app.postRunnable(wrapped), delay);
+    }
+
+    private void runLater (Runnable runnable, float delay) {
+        pendingRunnables.add(new PendingRunnable(runnable, delay));
+    }
+
+    static class PendingRunnable {
+        Runnable runnable;
+        float remainingDelay;
+
+        public PendingRunnable (Runnable runnable, float delay) {
+            this.runnable = runnable;
+            this.remainingDelay = delay;
+        }
     }
 
     static Runnable wrap (Runnable runnable, String tag) {
