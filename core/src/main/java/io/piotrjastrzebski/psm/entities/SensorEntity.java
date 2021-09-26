@@ -3,8 +3,6 @@ package io.piotrjastrzebski.psm.entities;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.physics.box2d.*;
 import io.piotrjastrzebski.psm.GameWorld;
-import io.piotrjastrzebski.psm.map.GameMapRoom;
-import io.piotrjastrzebski.psm.map.GameMapTile;
 
 public class SensorEntity extends BaseEntity {
     public SensorListener listener;
@@ -45,6 +43,8 @@ public class SensorEntity extends BaseEntity {
 
         // TODO only player?
         Filter filterData = fixture.getFilterData();
+        filterData.categoryBits = CATEGORY_SENSOR;
+        filterData.maskBits = CATEGORY_PLAYER;
         //filterData.categoryBits
         fixture.setFilterData(filterData);
     }

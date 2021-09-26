@@ -1,12 +1,9 @@
 package io.piotrjastrzebski.psm.entities;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.pfa.GraphPath;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.Fixture;
-import com.badlogic.gdx.physics.box2d.RayCastCallback;
 import io.piotrjastrzebski.psm.Events;
 import io.piotrjastrzebski.psm.GameWorld;
 import io.piotrjastrzebski.psm.map.GameMapTile;
@@ -17,7 +14,13 @@ public class EnemyShipEntity extends ShipEntity {
     public int tier = 1;
 
     public EnemyShipEntity (GameWorld world, float x, float y, float angle) {
-        super(world, x, y, angle);
+        super(world, x, y, angle, false);
+
+
+        firePrimaryCooldown = GameWorld.WORLD_STEPS_PER_SECOND / 4;
+
+        primaryAliveTime = .5f;
+        primaryVelocity = 10f;
     }
 
     GraphPath<GameMapTile> followPath;

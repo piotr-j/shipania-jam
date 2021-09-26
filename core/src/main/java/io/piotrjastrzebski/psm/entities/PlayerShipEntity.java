@@ -18,9 +18,12 @@ public class PlayerShipEntity extends ShipEntity {
     protected float deadzone = .1f;
 
     public PlayerShipEntity (GameWorld world, float x, float y, float angle) {
-        super(world, x, y, angle);
+        super(world, x, y, angle, true);
 
-        health(150);
+        primaryAliveTime = .5f;
+        primaryVelocity = 15;
+
+        health(100);
     }
 
     Vector3 v3 = new Vector3();

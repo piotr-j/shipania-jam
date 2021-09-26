@@ -1,6 +1,5 @@
 package io.piotrjastrzebski.psm.entities;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -31,22 +30,54 @@ public class ShipEntity extends MovableEntity {
     int firePrimaryCooldown = GameWorld.WORLD_STEPS_PER_SECOND / 6;
     int firePrimaryDelay = 0;
     int primaryDamage = 15;
+    float primaryAliveTime = -1;
+    float primaryVelocity = 5;
 
     boolean fireSecondary;
     // 1 times per second
     int fireSecondaryCooldown = GameWorld.WORLD_STEPS_PER_SECOND / 1;
     int fireSecondaryDelay = 0;
 
+    boolean isPlayer = false;
+
     // direction
     Vector2 lookAt = new Vector2();
 
-    public ShipEntity (GameWorld world, float x, float y, float angle) {
+    public ShipEntity (GameWorld world, float x, float y, float angle, boolean isPlayer) {
         super(world, x, y, angle);
-
+        this.isPlayer = isPlayer;
         health(100);
+
 
         forwardImpulse = 10;
         rightImpulse = 5;
+
+        createShipFixtures();
+    }
+
+    protected void createShipFixtures () {
+        CircleShape shape = new CircleShape();
+        shape.setRadius(.5f);
+        Fixture fixture = body.createFixture(shape, 1);
+        fixture.setFriction(0);
+        fixture.setRestitution(.3f);
+        Filter filterData = fixture.getFilterData();
+        if (isPlayer) {
+            filterData.categoryBits = CATEGORY_PLAYER;
+            filterData.maskBits = CATEGORY_WALL | CATEGORY_ENEMY | CATEGORY_PROJECTILE_ENEMY | CATEGORY_SENSOR;
+        } else {
+            filterData.categoryBits = CATEGORY_ENEMY;
+            filterData.maskBits = CATEGORY_WALL | CATEGORY_PLAYER | CATEGORY_PROJECTILE_PLAYER;
+        }
+
+        fixture.setFilterData(filterData);
+        shape.dispose();
+
+        // make it simpler to deal with, basically cube data
+        MassData massData = body.getMassData();
+        massData.mass = 1;
+        massData.I = 0.16666667f;
+        body.setMassData(massData);
     }
 
     @Override
@@ -58,26 +89,7 @@ public class ShipEntity extends MovableEntity {
         def.type = BodyDef.BodyType.DynamicBody;
         def.angularDamping = 20;
         def.linearDamping = 1;
-
-        Body body = world.box2d().createBody(def);
-
-        CircleShape shape = new CircleShape();
-        shape.setRadius(.5f);
-        Fixture fixture = body.createFixture(shape, 1);
-        fixture.setFriction(0);
-        fixture.setRestitution(.3f);
-        Filter filterData = fixture.getFilterData();
-
-        fixture.setFilterData(filterData);
-        shape.dispose();
-
-        // make it simpler to deal with, basically cube data
-        MassData massData = body.getMassData();
-        massData.mass = 1;
-        massData.I = 0.16666667f;
-        body.setMassData(massData);
-
-        return body;
+        return world.box2d().createBody(def);
     }
 
     @Override
@@ -127,22 +139,26 @@ public class ShipEntity extends MovableEntity {
 
     protected void firePrimary () {
         // small fast
+        float angle = target.angle();
+        firePrimary(angle, 1.5f);
+    }
 
+    protected void firePrimary (float angle, float offset) {
         float x = target.x();
         float y = target.y();
-        float angle = target.angle();
         tmp.set(1, 0).rotateRad(angle);
-        float fx = x + tmp.x * 1.5f;
-        float fy = y + tmp.y * 1.5f;
+        float fx = x + tmp.x * offset;
+        float fy = y + tmp.y * offset;
 
         // need to pool this crap at some point
         // friendly fire?
-        ProjectileEntity entity = new ProjectileEntity(world, fx, fy, angle);
+        ProjectileEntity entity = new ProjectileEntity(world, fx, fy, angle, isPlayer);
         entity.damage = primaryDamage;
+        entity.alive = primaryAliveTime;
         // inherit our velocity?
         Vector2 lv = body.getLinearVelocity();
-        float pvx = tmp.x * 20 + lv.x;
-        float pvy = tmp.y * 20 + lv.y;
+        float pvx = tmp.x * primaryVelocity + lv.x;
+        float pvy = tmp.y * primaryVelocity + lv.y;
         entity.body.setLinearVelocity(pvx, pvy);
 
         for (Fixture fixture : entity.body.getFixtureList()) {

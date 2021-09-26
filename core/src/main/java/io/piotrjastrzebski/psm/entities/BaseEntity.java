@@ -11,6 +11,13 @@ import io.piotrjastrzebski.psm.utils.Transform;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
 public abstract class BaseEntity {
+    public final static short CATEGORY_WALL = 1 << 0;
+    public final static short CATEGORY_SENSOR = 1 << 1;
+    public final static short CATEGORY_PLAYER = 1 << 2;
+    public final static short CATEGORY_ENEMY = 1 << 3;
+    public final static short CATEGORY_PROJECTILE_PLAYER = 1 << 4;
+    public final static short CATEGORY_PROJECTILE_ENEMY = 1 << 5;
+
     protected final int id;
     protected final GameWorld world;
     protected static Vector2 tmp = new Vector2();

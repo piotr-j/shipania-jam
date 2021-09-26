@@ -9,9 +9,32 @@ import space.earlygrey.shapedrawer.ShapeDrawer;
 public class ProjectileEntity extends MovableEntity {
     protected static final String TAG = ProjectileEntity.class.getSimpleName();
     public int damage = 15;
+    public float alive = -1;
+    public boolean players;
 
-    public ProjectileEntity (GameWorld world, float x, float y, float angle) {
+    public ProjectileEntity (GameWorld world, float x, float y, float angle, boolean players) {
         super(world, x, y, angle);
+        this.players = players;
+
+        PolygonShape shape = new PolygonShape();
+        shape.setAsBox(.25f, .05f);
+        // we want higher density so they push target a bit
+        Fixture fixture = body.createFixture(shape, 3);
+        fixture.setFriction(0);
+        fixture.setRestitution(.3f);
+//        fixture.setSensor(true);
+        Filter filterData = fixture.getFilterData();
+        if (players) {
+            filterData.categoryBits = CATEGORY_PROJECTILE_PLAYER;
+            filterData.maskBits = CATEGORY_WALL | CATEGORY_ENEMY;
+        } else {
+            filterData.categoryBits = CATEGORY_PROJECTILE_ENEMY;
+            filterData.maskBits = CATEGORY_WALL | CATEGORY_PLAYER;
+
+        }
+        fixture.setFilterData(filterData);
+        shape.dispose();
+
     }
 
     @Override
@@ -28,17 +51,6 @@ public class ProjectileEntity extends MovableEntity {
 
         Body body = world.box2d().createBody(def);
 
-        PolygonShape shape = new PolygonShape();
-        shape.setAsBox(.25f, .05f);
-        // we want higher density so they push target a bit
-        Fixture fixture = body.createFixture(shape, 3);
-        fixture.setFriction(0);
-        fixture.setRestitution(.3f);
-//        fixture.setSensor(true);
-        Filter filterData = fixture.getFilterData();
-
-        fixture.setFilterData(filterData);
-        shape.dispose();
         return body;
     }
 
@@ -47,6 +59,10 @@ public class ProjectileEntity extends MovableEntity {
     public void update (float dt, float alpha) {
         super.update(dt, alpha);
 
+        if (alive > 0) {
+            alive -= dt;
+            if (alive < 0) kill();
+        }
     }
 
     @Override
@@ -59,7 +75,11 @@ public class ProjectileEntity extends MovableEntity {
         float fy = tmp.y * .25f;
 
 
-        drawer.setColor(Color.RED);
+        if (players) {
+            drawer.setColor(Color.CHARTREUSE);
+        } else {
+            drawer.setColor(Color.SCARLET);
+        }
         drawer.line(x - fx, y - fy, x + fx, y + fy, .1f);
 
 //        drawer.setColor(Color.GOLDENROD);

@@ -32,7 +32,32 @@ public class BossEnemyShipEntity extends EnemyShipEntity {
         fireDuration = 2;
         fireCooldown = 2f;
 
+        primaryVelocity = 5;
+
         health(1000);
+    }
+
+    @Override
+    protected void createShipFixtures () {
+        CircleShape shape = new CircleShape();
+        shape.setRadius(2f);
+        Fixture fixture = body.createFixture(shape, 1);
+        fixture.setFriction(0);
+        fixture.setRestitution(.3f);
+
+        Filter filterData = fixture.getFilterData();
+        filterData.categoryBits = CATEGORY_ENEMY;
+        filterData.maskBits = CATEGORY_WALL | CATEGORY_PLAYER | CATEGORY_PROJECTILE_PLAYER;
+        fixture.setFilterData(filterData);
+
+
+        shape.dispose();
+
+        // make it simpler to deal with, basically cube data
+        MassData massData = body.getMassData();
+        massData.mass = 100;
+        massData.I = 0.16666667f;
+        body.setMassData(massData);
     }
 
     @Override
@@ -47,21 +72,7 @@ public class BossEnemyShipEntity extends EnemyShipEntity {
 
         Body body = world.box2d().createBody(def);
 
-        CircleShape shape = new CircleShape();
-        shape.setRadius(2f);
-        Fixture fixture = body.createFixture(shape, 1);
-        fixture.setFriction(0);
-        fixture.setRestitution(.3f);
-        Filter filterData = fixture.getFilterData();
 
-        fixture.setFilterData(filterData);
-        shape.dispose();
-
-        // make it simpler to deal with, basically cube data
-        MassData massData = body.getMassData();
-        massData.mass = 100;
-        massData.I = 0.16666667f;
-        body.setMassData(massData);
 
         return body;
     }
@@ -76,35 +87,9 @@ public class BossEnemyShipEntity extends EnemyShipEntity {
             float t = ((fireTimer - fireCooldown)/fireDuration - .5f) * 2;
             angle += t * 15 * MathUtils.degRad;
         }
-        firePrimary(angle - 15 * MathUtils.degRad);
-        firePrimary(angle);
-        firePrimary(angle + 15 * MathUtils.degRad);
-    }
-
-    private void firePrimary (float angle) {
-        float x = target.x();
-        float y = target.y();
-        tmp.set(1, 0).rotateRad(angle);
-        float fx = x + tmp.x * 2.5f;
-        float fy = y + tmp.y * 2.5f;
-
-        // need to pool this crap at some point
-        // friendly fire?
-        ProjectileEntity entity = new ProjectileEntity(world, fx, fy, angle);
-        entity.damage = primaryDamage;
-        // inherit our velocity?
-        Vector2 lv = body.getLinearVelocity();
-        float pvx = tmp.x * 7 + lv.x;
-        float pvy = tmp.y * 7 + lv.y;
-        entity.body.setLinearVelocity(pvx, pvy);
-
-        for (Fixture fixture : entity.body.getFixtureList()) {
-            Filter filter = fixture.getFilterData();
-
-            fixture.setFilterData(filter);
-        }
-
-        world.addEntity(entity);
+        firePrimary(angle - 15 * MathUtils.degRad, 2.5f);
+        firePrimary(angle, 2.5f);
+        firePrimary(angle + 15 * MathUtils.degRad, 2.5f);
     }
 
     @Override
@@ -161,5 +146,11 @@ public class BossEnemyShipEntity extends EnemyShipEntity {
         tmp.set(1, 0).rotateRad(angle);
         drawer.setColor(Color.BLACK);
         drawer.line(x() + tmp.x * 1f, y() + tmp.y * 1f, x() + tmp.x * 2.5f, y() + tmp.y * 2.5f, .3f);
+    }
+
+    @Override
+    public void changeHealth (int amount) {
+        if (!hasAggro) return;
+        super.changeHealth(amount);
     }
 }
