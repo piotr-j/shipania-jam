@@ -7,6 +7,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.RayCastCallback;
+import io.piotrjastrzebski.psm.Events;
 import io.piotrjastrzebski.psm.GameWorld;
 import io.piotrjastrzebski.psm.map.GameMapTile;
 import space.earlygrey.shapedrawer.ShapeDrawer;
@@ -64,6 +65,7 @@ public class EnemyShipEntity extends ShipEntity {
                 if (!hasAggro) {
                     return;
                 }
+                Events.send(Events.ENEMY_ENGAGED, this);
             }
             if (repathTimer > 0) {
                 repathTimer -= dt;
@@ -127,6 +129,12 @@ public class EnemyShipEntity extends ShipEntity {
     public void path (GraphPath<GameMapTile> resultPath) {
         followPath = resultPath;
         nextTile = 0;
+    }
+
+    @Override
+    public void changeHealth (int amount) {
+        super.changeHealth(amount);
+        Events.send(Events.ENEMY_HP_CHANGED, this);
     }
 
     @Override

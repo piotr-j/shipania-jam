@@ -43,6 +43,10 @@ public class DoorEntity extends BaseEntity {
         fixture.setSensor(false);
     }
 
+    public boolean isOpen () {
+        return fixture.isSensor();
+    }
+
     @Override
     public void drawDebug (ShapeDrawer drawer) {
         super.drawDebug(drawer);

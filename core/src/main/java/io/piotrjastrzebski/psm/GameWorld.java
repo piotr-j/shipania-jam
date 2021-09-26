@@ -122,6 +122,14 @@ public class GameWorld implements Telegraph {
     }
 
     private EnemyShipEntity spawnEnemy (int enemyId, float cx, float cy, String type, int tier) {
+        if ("boss".equals(type)) {
+            BossEnemyShipEntity entity = new BossEnemyShipEntity(this, cx, cy, 90 * MathUtils.PI2);
+            entity.enemyId = enemyId;
+            entity.health(100);
+            entities.add(entity);
+            Events.send(Events.ENTITY_SPAWNED, entity);
+            return entity;
+        }
         EnemyShipEntity entity = new EnemyShipEntity(this, cx, cy, MathUtils.random(MathUtils.PI2));
         entity.enemyId = enemyId;
         entity.health(25 + tier * 25);

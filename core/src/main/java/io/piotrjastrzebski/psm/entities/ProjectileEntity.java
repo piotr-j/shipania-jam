@@ -84,6 +84,12 @@ public class ProjectileEntity extends MovableEntity {
         super.hit(other, contact);
         // isHittable?
         if (other instanceof SensorEntity) return;
+        if (other instanceof DoorEntity) {
+            DoorEntity door = (DoorEntity)other;
+            if (door.isOpen()) {
+                return;
+            }
+        }
         other.changeHealth(-damage);
         // optional? based on weapon?
         kill();

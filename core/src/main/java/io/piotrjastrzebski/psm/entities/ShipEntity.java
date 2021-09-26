@@ -125,7 +125,7 @@ public class ShipEntity extends MovableEntity {
         }
     }
 
-    private void firePrimary () {
+    protected void firePrimary () {
         // small fast
 
         float x = target.x();
@@ -152,8 +152,6 @@ public class ShipEntity extends MovableEntity {
         }
 
         world.addEntity(entity);
-
-
     }
 
     private void fireSecondary () {

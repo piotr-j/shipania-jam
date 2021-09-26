@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.actions.AlphaAction;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.utils.Align;
+import io.piotrjastrzebski.psm.entities.BossEnemyShipEntity;
 import io.piotrjastrzebski.psm.entities.PlayerShipEntity;
 
 public class Hud extends Table implements Telegraph {
@@ -22,6 +23,9 @@ public class Hud extends Table implements Telegraph {
     Table dmgContainer;
     Label dmgLabel;
 
+    Table bossContainer;
+    Label bossLabel;
+
     public Hud (SMApp app, GameScreen gameScreen) {
         this.app = app;
         skin = app.assets.skin;
@@ -33,7 +37,7 @@ public class Hud extends Table implements Telegraph {
 
             Table inner = new Table();
             hpSlider = new Slider(0, 1, .01f, false, skin);
-            hpLabel = new Label("0/0", skin);
+            hpLabel = new Label("", skin);
             hpLabel.setFontScale(2);
             hpLabel.setColor(Color.LIME);
             inner.add(hpLabel).padRight(10);
@@ -45,16 +49,28 @@ public class Hud extends Table implements Telegraph {
             dmgContainer = new Table();
             dmgContainer.setFillParent(true);
 
-            dmgLabel = new Label("15", skin);
+            dmgLabel = new Label("", skin);
             dmgLabel.setFontScale(2);
             dmgLabel.setColor(Color.SCARLET);
             dmgContainer.add(dmgLabel).expand().top().right().pad(40);
+        }
+        {
+            bossContainer = new Table();
+            bossContainer.setFillParent(true);
+
+            bossLabel = new Label("", skin);
+            bossLabel.setFontScale(2.5f);
+            bossLabel.setColor(Color.SCARLET);
+            bossContainer.add(bossLabel).expand().bottom().pad(40);
         }
 
 
         Events.register(this, Events.PLAYER_SPAWNED);
         Events.register(this, Events.PLAYER_KILLED);
         Events.register(this, Events.PLAYER_HP_CHANGED);
+        Events.register(this, Events.ENEMY_ENGAGED);
+        Events.register(this, Events.ENEMY_HP_CHANGED);
+        Events.register(this, Events.ENTITY_KILLED);
     }
 
     @Override
@@ -73,8 +89,33 @@ public class Hud extends Table implements Telegraph {
             PlayerShipEntity player = (PlayerShipEntity)msg.extraInfo;
             update(player);
         } break;
+        case Events.ENEMY_ENGAGED: {
+            if (msg.extraInfo instanceof BossEnemyShipEntity) {
+                addActor(bossContainer);
+                updateBoss((BossEnemyShipEntity)msg.extraInfo);
+            }
+        } break;
+        case Events.ENEMY_HP_CHANGED: {
+            if (msg.extraInfo instanceof BossEnemyShipEntity) {
+                updateBoss((BossEnemyShipEntity)msg.extraInfo);
+            }
+        } break;
+        case Events.ENTITY_KILLED: {
+            if (msg.extraInfo instanceof BossEnemyShipEntity) {
+                bossKilled();
+                showWin();
+            }
+        } break;
         }
         return false;
+    }
+
+    private void updateBoss (BossEnemyShipEntity extraInfo) {
+        bossLabel.setText("BOSS: " + extraInfo.health() + "/" + extraInfo.maxHealth());
+    }
+
+    private void bossKilled () {
+        bossContainer.remove();
     }
 
     private void update (PlayerShipEntity player) {
@@ -94,6 +135,7 @@ public class Hud extends Table implements Telegraph {
     private void hideHud () {
         hpContainer.remove();
         dmgContainer.remove();
+        bossContainer.remove();
     }
 
     private void showDeath () {
@@ -101,7 +143,24 @@ public class Hud extends Table implements Telegraph {
         container.setTransform(true);
 
         Label label = new Label("YOU DIED!", skin);
+        label.setColor(Color.SCARLET);
+        label.pack();
+        container.add(label);
+        container.setPosition(getWidth()/2, getHeight()/2, Align.center);
+        container.setScale(4);
+        container.addAction(Actions.sequence(
+            Actions.scaleTo(6, 6, 1.5f, Interpolation.sine),
+            Actions.removeActor()
+        ));
+        addActor(container);
+    }
 
+    private void showWin () {
+        Table container = new Table();
+        container.setTransform(true);
+
+        Label label = new Label("YOU WON!", skin);
+        label.setColor(Color.GOLD);
         label.pack();
         container.add(label);
         container.setPosition(getWidth()/2, getHeight()/2, Align.center);

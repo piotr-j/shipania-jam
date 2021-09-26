@@ -15,6 +15,8 @@ public class Events {
     public static final int PLAYER_SPAWNED = 10002;
     public static final int PLAYER_KILLED = 10003;
     public static final int PLAYER_HP_CHANGED = 10004;
+    public static final int ENEMY_HP_CHANGED = 10005;
+    public static final int ENEMY_ENGAGED = 10006;
 
     public static final int GAME_RESTART_REQUEST = 10100;
     public static final int GAME_RESTARTING = 10101;

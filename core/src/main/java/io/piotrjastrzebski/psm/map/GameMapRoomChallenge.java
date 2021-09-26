@@ -69,6 +69,7 @@ public class GameMapRoomChallenge extends GameMapRoom implements Telegraph {
         case Events.GAME_RESTARTING: {
             Gdx.app.log(TAG, "restart! " + aliveEnemies);
             aliveEnemies = 0;
+            world.openDoors(doorId);
         } break;
         }
         return false;
