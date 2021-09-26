@@ -18,6 +18,10 @@ public class Hud extends Table implements Telegraph {
     Label hpLabel;
     Slider hpSlider;
 
+
+    Table dmgContainer;
+    Label dmgLabel;
+
     public Hud (SMApp app, GameScreen gameScreen) {
         this.app = app;
         skin = app.assets.skin;
@@ -30,11 +34,21 @@ public class Hud extends Table implements Telegraph {
             Table inner = new Table();
             hpSlider = new Slider(0, 1, .01f, false, skin);
             hpLabel = new Label("0/0", skin);
-            hpLabel.setColor(Color.SCARLET);
+            hpLabel.setFontScale(2);
+            hpLabel.setColor(Color.LIME);
+            inner.add(hpLabel).padRight(10);
             inner.add(hpSlider);
-            inner.add(hpLabel);
 
             hpContainer.add(inner).expand().top().left().pad(40);
+        }
+        {
+            dmgContainer = new Table();
+            dmgContainer.setFillParent(true);
+
+            dmgLabel = new Label("15", skin);
+            dmgLabel.setFontScale(2);
+            dmgLabel.setColor(Color.SCARLET);
+            dmgContainer.add(dmgLabel).expand().top().right().pad(40);
         }
 
 
@@ -66,17 +80,20 @@ public class Hud extends Table implements Telegraph {
     private void update (PlayerShipEntity player) {
         float hp = player.health();
         float mhp = player.maxHealth();
-        hpLabel.setText(player.health() + "/" + player.maxHealth());
+        hpLabel.setText("HP: "+player.health() + "/" + player.maxHealth());
         hpSlider.setValue(hp/mhp);
 
+        dmgLabel.setText("DMG: " + player.damage());
     }
 
     private void showHud () {
         addActor(hpContainer);
+        addActor(dmgContainer);
     }
 
     private void hideHud () {
         hpContainer.remove();
+        dmgContainer.remove();
     }
 
     private void showDeath () {

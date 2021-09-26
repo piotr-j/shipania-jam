@@ -205,7 +205,7 @@ public class GameMap implements IndexedGraph<GameMapTile>, Telegraph {
                     playerSpawn.set(cx, cy);
                 }
                 String enemyType = props.get("enemy-type", null, String.class);
-                String enemyTier = props.get("enemy-tier", "tier1", String.class);
+                int enemyTier = props.get("enemy-tier", 1, Integer.class);
                 int enemyId = props.get("enemy-id", 0, Integer.class);
                 if (enemyType != null) {
                     world.addEnemySpawn(enemyId, cx, cy, enemyType, enemyTier);
@@ -213,7 +213,7 @@ public class GameMap implements IndexedGraph<GameMapTile>, Telegraph {
                 }
 
                 String buffType = props.get("buff-type", null, String.class);
-                String buffTier = props.get("buff-tier", "tier1", String.class);
+                int buffTier = props.get("buff-tier", 1, Integer.class);
                 if (buffType != null) {
                     world.spawnBuff(cx, cy, buffType, buffTier);
                     continue;

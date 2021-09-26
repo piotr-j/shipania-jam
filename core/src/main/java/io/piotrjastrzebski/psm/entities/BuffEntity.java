@@ -10,6 +10,8 @@ public class BuffEntity extends SensorEntity {
     protected static final String TAG = BuffEntity.class.getSimpleName();
     public int extraHealth;
     public int healHealth;
+    public int extraDamage;
+    public int tier = 1;
 
     public BuffEntity (GameWorld world, float x, float y, float width, float height) {
         super(world, x, y, width, height);
@@ -19,9 +21,11 @@ public class BuffEntity extends SensorEntity {
     public void hit (BaseEntity other, Contact contact) {
         super.hit(other, contact);
         if (other instanceof PlayerShipEntity) {
-            other.maxHealth += extraHealth;
-            other.changeHealth(healHealth);
-            Gdx.app.log(TAG, "Buff player hp +" + extraHealth + ", heal +" + healHealth);
+            ShipEntity entity = (ShipEntity)other;
+            entity.primaryDamage += extraDamage;
+            entity.maxHealth += extraHealth;
+            entity.changeHealth(healHealth);
+            //Gdx.app.log(TAG, "Buff player hp +" + extraHealth + ", heal +" + healHealth + ", dmg +" + extraDamage);
             kill();
         }
     }
@@ -29,7 +33,14 @@ public class BuffEntity extends SensorEntity {
     @Override
     public void drawDebug (ShapeDrawer drawer) {
         super.drawDebug(drawer);
-        drawer.setColor(Color.GREEN);
-        drawer.filledCircle(current.x(), current.y(), .4f);
+        if (extraDamage > 0) {
+            drawer.setColor(Color.SCARLET);
+        } else if (extraHealth > 0) {
+            drawer.setColor(Color.LIME);
+        }
+        drawer.filledCircle(x(), y(), .3f + tier * .2f);
+        drawer.setColor(Color.BLACK);
+        drawer.line(x() - .3f, y(), x() + .3f, y(), .1f);
+        drawer.line(x(), y() - .3f, x(), y() + .3f, .1f);
     }
 }

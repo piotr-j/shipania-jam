@@ -30,6 +30,7 @@ public class ShipEntity extends MovableEntity {
     // 3 times per second
     int firePrimaryCooldown = GameWorld.WORLD_STEPS_PER_SECOND / 6;
     int firePrimaryDelay = 0;
+    int primaryDamage = 15;
 
     boolean fireSecondary;
     // 1 times per second
@@ -137,6 +138,7 @@ public class ShipEntity extends MovableEntity {
         // need to pool this crap at some point
         // friendly fire?
         ProjectileEntity entity = new ProjectileEntity(world, fx, fy, angle);
+        entity.damage = primaryDamage;
         // inherit our velocity?
         Vector2 lv = body.getLinearVelocity();
         float pvx = tmp.x * 20 + lv.x;
@@ -208,5 +210,13 @@ public class ShipEntity extends MovableEntity {
 
     protected void rotateRight (float rotateRight) {
         this.rotateRight = rotateRight;
+    }
+
+    public int damage () {
+        return primaryDamage;
+    }
+
+    public void damage (int damage) {
+        primaryDamage = damage;
     }
 }

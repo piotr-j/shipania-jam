@@ -110,28 +110,37 @@ public class GameWorld implements Telegraph {
         if (prevPlayer != null) {
             // keep unlocks
             player.health(prevPlayer.maxHealth());
+            player.damage(prevPlayer.damage());
         }
 
         entities.add(player);
         Events.send(Events.PLAYER_SPAWNED, player);
     }
 
-    public void addEnemySpawn (int enemyId, float cx, float cy, String type, String tier) {
+    public void addEnemySpawn (int enemyId, float cx, float cy, String type, int tier) {
         enemySpawns.add(new EnemySpawn(enemyId, cx, cy, type, tier));
     }
 
-    private EnemyShipEntity spawnEnemy (int enemyId, float cx, float cy, String type, String tier) {
+    private EnemyShipEntity spawnEnemy (int enemyId, float cx, float cy, String type, int tier) {
         EnemyShipEntity entity = new EnemyShipEntity(this, cx, cy, MathUtils.random(MathUtils.PI2));
         entity.enemyId = enemyId;
-        entity.health(50);
+        entity.health(25 + tier * 25);
+        entity.damage(10 + tier * 5);
+        entity.tier = tier;
         entities.add(entity);
         Events.send(Events.ENTITY_SPAWNED, entity);
         return entity;
     }
 
-    public void spawnBuff (float cx, float cy, String type, String tier) {
+    public void spawnBuff (float cx, float cy, String type, int tier) {
         BuffEntity entity = new BuffEntity(this, cx, cy, .75f, .75f);
-        entity.extraHealth = 25;
+        if ("hp".equals(type)) {
+            entity.extraHealth = 25 * tier;
+        } else if ("dmg".equals(type)) {
+            entity.extraDamage = 5 * tier;
+        } else if ("heal".equals(type)) {
+            entity.healHealth = 100 * tier;
+        }
         entities.add(entity);
         Events.send(Events.ENTITY_SPAWNED, entity);
     }
@@ -308,10 +317,10 @@ public class GameWorld implements Telegraph {
         final float x;
         final float y;
         final String type;
-        final String tier;
+        final int tier;
         EnemyShipEntity entity;
 
-        public EnemySpawn (int enemyId, float x, float y, String type, String tier) {
+        public EnemySpawn (int enemyId, float x, float y, String type, int tier) {
             this.enemyId = enemyId;
             this.x = x;
             this.y = y;

@@ -13,6 +13,7 @@ import space.earlygrey.shapedrawer.ShapeDrawer;
 
 public class EnemyShipEntity extends ShipEntity {
     public int enemyId;
+    public int tier = 1;
 
     public EnemyShipEntity (GameWorld world, float x, float y, float angle) {
         super(world, x, y, angle);
@@ -133,7 +134,7 @@ public class EnemyShipEntity extends ShipEntity {
         super.drawDebug(drawer);
 
         drawer.setColor(Color.RED);
-        drawer.circle(current.x(), current.y(), .49f, .1f);
+        drawer.circle(current.x(), current.y(), .1f + tier * .3f, .1f);
 
         if (!(followPath != null && followPath.getCount() > 0 && followPath.getCount() < maxFollowPathLength)) return;
         if (true) return;
