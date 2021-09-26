@@ -3,21 +3,12 @@ package io.piotrjastrzebski.psm.utils;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Array;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-
 public class Async {
     protected static final String TAG = Async.class.getSimpleName();
 
     protected volatile static Async instance;
-    protected ScheduledExecutorService executor;
 
     public Async () {
-        executor = Executors.newScheduledThreadPool(1, r -> {
-            Thread thread = new Thread(r, "Async");
-            thread.setDaemon(true);
-            return thread;
-        });
         instance = this;
     }
 
@@ -39,7 +30,7 @@ public class Async {
     }
 
     public void dispose () {
-        executor.shutdownNow();
+
     }
 
     public static void ui (Runnable runnable) {
