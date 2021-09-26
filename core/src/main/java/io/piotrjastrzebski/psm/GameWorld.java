@@ -338,9 +338,9 @@ public class GameWorld implements Telegraph {
         return rayHandler;
     }
 
-    public void activateEntities (int roomId, boolean active) {
+    public void activateEntities (int mapId, boolean active) {
         for (BaseEntity entity : entities) {
-            if (entity.mapId() == roomId) {
+            if (entity.mapId() == mapId) {
                 entity.active(active);
             }
         }
