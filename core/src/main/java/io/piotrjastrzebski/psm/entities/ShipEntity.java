@@ -126,7 +126,6 @@ public class ShipEntity extends MovableEntity {
 
     private void firePrimary () {
         // small fast
-        Gdx.app.log(TAG, "prim!");
 
         float x = target.x();
         float y = target.y();
@@ -157,7 +156,6 @@ public class ShipEntity extends MovableEntity {
 
     private void fireSecondary () {
         // large slow, charge? hold fire for a bit to charge up, dealing more damage or whatever
-        Gdx.app.log(TAG, "sec!");
     }
 
     @Override

@@ -13,16 +13,14 @@ import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapLayers;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.MapProperties;
+import com.badlogic.gdx.maps.objects.PolygonMapObject;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.objects.TiledMapTileMapObject;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
-import com.badlogic.gdx.math.GridPoint2;
-import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.utils.*;
 import io.piotrjastrzebski.psm.Events;
 import io.piotrjastrzebski.psm.GameWorld;
@@ -161,6 +159,7 @@ public class GameMap implements IndexedGraph<GameMapTile>, Telegraph {
 //            }
 //        }
 
+        EarClippingTriangulator triangulator = new EarClippingTriangulator();
         MapLayers layers = map.getLayers();
         MapLayer helpers = layers.get("helpers");
         for (MapObject object : helpers.getObjects()) {
@@ -171,14 +170,26 @@ public class GameMap implements IndexedGraph<GameMapTile>, Telegraph {
                 int y = MathUtils.floor(rect.y);
                 int width = MathUtils.ceil(rect.x + rect.width) - x;
                 int height = MathUtils.ceil(rect.y + rect.height) - y;
-                String type = mo.getProperties().get("type", null, String.class);
+                MapProperties props = mo.getProperties();
+                String type = props.get("type", null, String.class);
                 if ("room-reveal".equals(type)) {
                     // add room
                     GameMapRoomReveal room = new GameMapRoomReveal(world, x, y, width, height);
                     rooms.add(room);
                 } else if ("room-challenge".equals(type)) {
                     GameMapRoomChallenge room = new GameMapRoomChallenge(world, x, y, width, height);
+                    room.doorId = props.get("door-id", 0, Integer.class);
+                    room.enemyId = props.get("enemy-id", 0, Integer.class);;
                     rooms.add(room);
+                } else if ("door".equals(type)) {
+                    int id = props.get("door-id", 0, Integer.class);
+                    boolean locked = props.get("locked", false, Boolean.class);
+                    world.addDoor(id, x,y ,width, height, locked);
+                } else if ("switch".equals(type)) {
+                    int doorId = props.get("door-id", 0, Integer.class);
+                    world.addSwitch(doorId, x, y);
+                } else {
+                    Gdx.app.log(TAG, "unknown type: " + type);
                 }
                 //
                 continue;
@@ -195,8 +206,9 @@ public class GameMap implements IndexedGraph<GameMapTile>, Telegraph {
                 }
                 String enemyType = props.get("enemy-type", null, String.class);
                 String enemyTier = props.get("enemy-tier", "tier1", String.class);
+                int enemyId = props.get("enemy-id", 0, Integer.class);
                 if (enemyType != null) {
-                    world.addEnemySpawn(cx, cy, enemyType, enemyTier);
+                    world.addEnemySpawn(enemyId, cx, cy, enemyType, enemyTier);
                     continue;
                 }
 
@@ -207,6 +219,50 @@ public class GameMap implements IndexedGraph<GameMapTile>, Telegraph {
                     continue;
                 }
 
+                continue;
+            }
+            if (object instanceof PolygonMapObject) {
+                PolygonMapObject mo = (PolygonMapObject)object;
+                Polygon polygon = mo.getPolygon();
+                Rectangle rect = polygon.getBoundingRectangle();
+                int x = MathUtils.floor(rect.x);
+                int y = MathUtils.floor(rect.y);
+                int width = MathUtils.ceil(rect.x + rect.width) - x;
+                int height = MathUtils.ceil(rect.y + rect.height) - y;
+                MapProperties props = mo.getProperties();
+                String type = props.get("type", null, String.class);
+                float[] vertices = polygon.getTransformedVertices();
+//                ShortArray triangles = triangulator.computeTriangles(vertices);
+//                float[] verts = new float[triangles.size * 6];
+//                int t = 0;
+//                for (int i = 0; i < triangles.size; i+=3) {
+//                    int v1 = triangles.get(i);
+//                    int v2 = triangles.get(i + 1);
+//                    int v3 = triangles.get(i + 2);
+////                    verts[t++] = x + vertices[v1];
+////                    verts[t++] = y + vertices[v1 + 1];
+////                    verts[t++] = x + vertices[v2];
+////                    verts[t++] = y + vertices[v2 + 1];
+////                    verts[t++] = x + vertices[v3];
+////                    verts[t++] = y + vertices[v3 + 1];
+//
+//                    verts[t++] = vertices[v1];
+//                    verts[t++] = vertices[v1 + 1];
+//                    verts[t++] = vertices[v2];
+//                    verts[t++] = vertices[v2 + 1];
+//                    verts[t++] = vertices[v3];
+//                    verts[t++] = vertices[v3 + 1];
+//                }
+                if ("room-reveal".equals(type)) {
+                    // add room
+                    GameMapRoomReveal room = new GameMapRoomReveal(world, new Polygon(vertices));
+                    rooms.add(room);
+                } else if ("room-challenge".equals(type)) {
+                    GameMapRoomChallenge room = new GameMapRoomChallenge(world, new Polygon(vertices));
+                    room.doorId = props.get("door-id", 0, Integer.class);
+                    room.enemyId = props.get("enemy-id", 0, Integer.class);;
+                    rooms.add(room);
+                }
                 continue;
             }
             Gdx.app.log(TAG, "other object: " + object);
@@ -350,10 +406,9 @@ public class GameMap implements IndexedGraph<GameMapTile>, Telegraph {
             }
         }
 
-        if (false) {
+        if (true) {
             for (GameMapRoom room : rooms) {
-                drawer.setColor(Color.ORANGE);
-                drawer.rectangle(room.bounds, .1f);
+                room.debugDraw(drawer);
             }
         }
         if (false) {

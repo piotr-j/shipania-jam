@@ -35,6 +35,7 @@ public class GameWorld implements Telegraph {
     protected final Vector2 playerSpawn = new Vector2();
 
     protected final Array<EnemySpawn> enemySpawns = new Array<>();
+    protected final Array<DoorEntity> doors = new Array<>();
 
     public GameWorld (SMApp app, GameScreen gameScreen) {
         this.app = app;
@@ -115,14 +116,16 @@ public class GameWorld implements Telegraph {
         Events.send(Events.PLAYER_SPAWNED, player);
     }
 
-    public void addEnemySpawn (float cx, float cy, String type, String tier) {
-        enemySpawns.add(new EnemySpawn(cx, cy, type, tier));
+    public void addEnemySpawn (int enemyId, float cx, float cy, String type, String tier) {
+        enemySpawns.add(new EnemySpawn(enemyId, cx, cy, type, tier));
     }
 
-    private BaseEntity spawnEnemy (float cx, float cy, String type, String tier) {
+    private EnemyShipEntity spawnEnemy (int enemyId, float cx, float cy, String type, String tier) {
         EnemyShipEntity entity = new EnemyShipEntity(this, cx, cy, MathUtils.random(MathUtils.PI2));
+        entity.enemyId = enemyId;
         entity.health(50);
         entities.add(entity);
+        Events.send(Events.ENTITY_SPAWNED, entity);
         return entity;
     }
 
@@ -130,6 +133,7 @@ public class GameWorld implements Telegraph {
         BuffEntity entity = new BuffEntity(this, cx, cy, .75f, .75f);
         entity.extraHealth = 25;
         entities.add(entity);
+        Events.send(Events.ENTITY_SPAWNED, entity);
     }
 
     float accumulator;
@@ -163,11 +167,11 @@ public class GameWorld implements Telegraph {
         for (BaseEntity entity : entities) {
             entity.drawDebug(drawer);
         }
-        if (true) map.renderDebug(camera, drawer);
         map.renderForeground(camera);
+        if (true) map.renderDebug(camera, drawer);
         batch.end();
 
-        if (false) {
+        if (true) {
             debugRenderer.render(world, batch.getProjectionMatrix());
         }
     }
@@ -228,12 +232,14 @@ public class GameWorld implements Telegraph {
         switch (msg.message) {
         case Events.GAME_RESTART_REQUEST: {
             if (player == null) {
+                Events.send(Events.GAME_RESTARTING);
                 spawnPlayer();
                 spawnEnemies();
             }
         } break;
         case Events.PLAYER_KILLED: {
             Async.ui(() -> {
+                Events.send(Events.GAME_RESTARTING);
                 spawnPlayer();
                 spawnEnemies();
             }, 2);
@@ -248,7 +254,7 @@ public class GameWorld implements Telegraph {
             destroyEntity(spawn.entity);
         }
         for (EnemySpawn spawn : enemySpawns) {
-            spawn.entity = spawnEnemy(spawn.x, spawn.y, spawn.type, spawn.tier);
+            spawn.entity = spawnEnemy(spawn.enemyId, spawn.x, spawn.y, spawn.type, spawn.tier);
         }
     }
 
@@ -258,15 +264,55 @@ public class GameWorld implements Telegraph {
         entity.destroy(world);
     }
 
+    public void addDoor (int id, int x, int y, int width, int height, boolean locked) {
+        DoorEntity door = new DoorEntity(id, this, x, y, width, height);
+        if (locked) {
+            door.close();
+        }
+        doors.add(door);
+        addEntity(door);
+    }
+
+    public void openDoors (int doorId) {
+        for (DoorEntity door : doors) {
+            if (door.doorId() == doorId) {
+                door.open();
+            }
+        }
+    }
+
+    public void closeDoors (int doorId) {
+        for (DoorEntity door : doors) {
+            if (door.doorId() == doorId) {
+                door.close();
+            }
+        }
+    }
+
+    public void addSwitch (int doorId, int x, int y) {
+        SwitchEntity entity = new SwitchEntity(this, x -.5f, y -.5f, 1, 1);
+        entity.doorId = doorId;
+        entities.add(entity);
+        Events.send(Events.ENTITY_SPAWNED, entity);
+    }
+
+    public void findDoors (int doorId, Array<DoorEntity> out) {
+        out.clear();
+        for (DoorEntity door : doors) {
+            if (door.doorId() == doorId) out.add(door);
+        }
+    }
+
     static class EnemySpawn {
+        final int enemyId;
         final float x;
         final float y;
         final String type;
         final String tier;
-        BaseEntity entity;
+        EnemyShipEntity entity;
 
-        public EnemySpawn (float x, float y, String type, String tier) {
-
+        public EnemySpawn (int enemyId, float x, float y, String type, String tier) {
+            this.enemyId = enemyId;
             this.x = x;
             this.y = y;
             this.type = type;

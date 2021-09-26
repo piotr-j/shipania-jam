@@ -1,5 +1,6 @@
 package io.piotrjastrzebski.psm.entities;
 
+import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.physics.box2d.*;
 import io.piotrjastrzebski.psm.GameWorld;
 import io.piotrjastrzebski.psm.map.GameMapRoom;
@@ -16,6 +17,31 @@ public class SensorEntity extends BaseEntity {
         Fixture fixture = body.createFixture(sensorShape, 1);
         fixture.setSensor(true);
         sensorShape.dispose();
+
+        // TODO only player?
+        Filter filterData = fixture.getFilterData();
+        //filterData.categoryBits
+        fixture.setFilterData(filterData);
+    }
+
+    public SensorEntity (GameWorld world, float x, float y, Polygon polygon) {
+        super(world, x, y, 0);
+
+
+
+//        PolygonShape sensorShape = new PolygonShape();
+//        sensorShape.setAsBox(5, 5);
+//        Fixture fixture = body.createFixture(sensorShape, 1);
+//        fixture.setSensor(true);
+        polygon.setPosition(-x, -y);
+
+        PolygonShape sensorShape = new PolygonShape();
+        sensorShape.set(polygon.getTransformedVertices());
+        Fixture fixture = body.createFixture(sensorShape, 1);
+        fixture.setSensor(true);
+
+        sensorShape.dispose();
+        polygon.setPosition(0, 0);
 
         // TODO only player?
         Filter filterData = fixture.getFilterData();

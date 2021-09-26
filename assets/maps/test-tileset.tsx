@@ -45,6 +45,7 @@
  </tile>
  <tile id="10">
   <properties>
+   <property name="enemy-id" type="int" value="0"/>
    <property name="enemy-tier" value=""/>
    <property name="enemy-type" value=""/>
   </properties>

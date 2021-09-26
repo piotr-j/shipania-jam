@@ -12,6 +12,8 @@ import io.piotrjastrzebski.psm.map.GameMapTile;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
 public class EnemyShipEntity extends ShipEntity {
+    public int enemyId;
+
     public EnemyShipEntity (GameWorld world, float x, float y, float angle) {
         super(world, x, y, angle);
     }

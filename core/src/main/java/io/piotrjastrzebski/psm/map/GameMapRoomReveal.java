@@ -1,5 +1,6 @@
 package io.piotrjastrzebski.psm.map;
 
+import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.physics.box2d.Contact;
 import io.piotrjastrzebski.psm.GameWorld;
 import io.piotrjastrzebski.psm.entities.BaseEntity;
@@ -10,6 +11,10 @@ public class GameMapRoomReveal extends GameMapRoom {
 
     public GameMapRoomReveal (GameWorld world, int x, int y, int width, int height) {
         super(world, x, y, width, height);
+    }
+
+    public GameMapRoomReveal (GameWorld world, Polygon polygon) {
+        super(world, polygon);
     }
 
     @Override

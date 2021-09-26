@@ -83,7 +83,7 @@ public class PlayerShipEntity extends ShipEntity {
 
     @Override
     public void changeHealth (int amount) {
-        super.changeHealth(amount);
+        //super.changeHealth(amount);
         Events.send(Events.PLAYER_HP_CHANGED, this);
     }
 }
