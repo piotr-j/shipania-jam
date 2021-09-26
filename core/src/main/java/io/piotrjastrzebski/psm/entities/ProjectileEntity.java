@@ -1,5 +1,6 @@
 package io.piotrjastrzebski.psm.entities;
 
+import box2dLight.PointLight;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
@@ -23,15 +24,26 @@ public class ProjectileEntity extends MovableEntity {
         fixture.setFriction(0);
         fixture.setRestitution(.3f);
 //        fixture.setSensor(true);
+
+        PointLight light = new PointLight(world.rays(), 8);
+        light.setSoft(false);
+        light.setXray(true);
+        light.setPosition(x(), y());
+        light.setDistance(.7f);
+        light.setContactFilter(CATEGORY_LIGHT, (short)0, CATEGORY_WALL);
+        lights.add(light);
+
         Filter filterData = fixture.getFilterData();
         if (players) {
+            light.setColor(Color.CHARTREUSE);
             filterData.categoryBits = CATEGORY_PROJECTILE_PLAYER;
             filterData.maskBits = CATEGORY_WALL | CATEGORY_ENEMY;
         } else {
+            light.setColor(Color.SCARLET);
             filterData.categoryBits = CATEGORY_PROJECTILE_ENEMY;
             filterData.maskBits = CATEGORY_WALL | CATEGORY_PLAYER;
-
         }
+        light.getColor().a = .75f;
         fixture.setFilterData(filterData);
         shape.dispose();
 

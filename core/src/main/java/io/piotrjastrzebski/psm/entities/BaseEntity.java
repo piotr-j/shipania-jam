@@ -1,10 +1,12 @@
 package io.piotrjastrzebski.psm.entities;
 
+import box2dLight.Light;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.utils.Array;
 import com.esotericsoftware.spine.utils.TwoColorPolygonBatch;
 import io.piotrjastrzebski.psm.GameWorld;
 import io.piotrjastrzebski.psm.utils.Transform;
@@ -17,8 +19,10 @@ public abstract class BaseEntity {
     public final static short CATEGORY_ENEMY = 1 << 3;
     public final static short CATEGORY_PROJECTILE_PLAYER = 1 << 4;
     public final static short CATEGORY_PROJECTILE_ENEMY = 1 << 5;
+    public final static short CATEGORY_LIGHT = 1 << 6;
 
     protected final int id;
+    public int mapId;
     protected final GameWorld world;
     protected static Vector2 tmp = new Vector2();
     protected Body body;
@@ -26,6 +30,9 @@ public abstract class BaseEntity {
     // unbreakable if -1
     protected int maxHealth = -1;
     protected int health = -1;
+
+    protected boolean active = true;
+    protected Array<Light> lights = new Array<>();
 
     protected boolean pendingRemoval;
 
@@ -113,10 +120,29 @@ public abstract class BaseEntity {
         return body != null;
     }
 
+    public void active (boolean active) {
+        this.active = active;
+        for (Light light : lights) {
+            light.setActive(active);
+        }
+    }
+
+    public boolean isActive () {
+        return active;
+    }
+
     public void destroy (World world) {
         if (body != null) {
             world.destroyBody(body);
             body = null;
+            for (Light light : lights) {
+                light.remove();
+            }
+            lights.clear();
         }
+    }
+
+    public int mapId () {
+        return mapId;
     }
 }

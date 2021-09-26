@@ -1,7 +1,7 @@
 package io.piotrjastrzebski.psm;
 
+import box2dLight.RayHandler;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ai.msg.Telegram;
 import com.badlogic.gdx.ai.msg.Telegraph;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -36,6 +36,8 @@ public class GameWorld implements Telegraph {
 
     protected final Array<EnemySpawn> enemySpawns = new Array<>();
     protected final Array<DoorEntity> doors = new Array<>();
+
+    protected final RayHandler rayHandler;
 
     public GameWorld (SMApp app, GameScreen gameScreen) {
         this.app = app;
@@ -80,11 +82,18 @@ public class GameWorld implements Telegraph {
         debugRenderer = new Box2DDebugRenderer();
         entities = new Array<>();
 
+
+        rayHandler = new RayHandler(world, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+
         map = new GameMap(app, this);
         playerSpawn.set(map.playerSpawn());
 //        spawnPlayer();
 //        spawnEnemies();
         Events.register(this, Events.GAME_RESTART_REQUEST, Events.PLAYER_KILLED);
+    }
+
+    public void resize () {
+        rayHandler.resizeFBO(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
     }
 
 
@@ -124,14 +133,13 @@ public class GameWorld implements Telegraph {
     private EnemyShipEntity spawnEnemy (int enemyId, float cx, float cy, String type, int tier) {
         if ("boss".equals(type)) {
             BossEnemyShipEntity entity = new BossEnemyShipEntity(this, cx, cy, 90 * MathUtils.PI2);
-            entity.enemyId = enemyId;
-            entity.health(100);
+            entity.mapId = enemyId;
             entities.add(entity);
             Events.send(Events.ENTITY_SPAWNED, entity);
             return entity;
         }
         EnemyShipEntity entity = new EnemyShipEntity(this, cx, cy, MathUtils.random(MathUtils.PI2));
-        entity.enemyId = enemyId;
+        entity.mapId = enemyId;
         entity.health(25 + tier * 25);
         entity.damage(10 + tier * 5);
         entity.tier = tier;
@@ -140,8 +148,9 @@ public class GameWorld implements Telegraph {
         return entity;
     }
 
-    public void spawnBuff (float cx, float cy, String type, int tier) {
+    public void spawnBuff (int mapId, float cx, float cy, String type, int tier) {
         BuffEntity entity = new BuffEntity(this, cx, cy, .75f, .75f);
+        entity.mapId = mapId;
         if ("hp".equals(type)) {
             entity.extraHealth = 25 * tier;
         } else if ("dmg".equals(type)) {
@@ -188,7 +197,11 @@ public class GameWorld implements Telegraph {
         if (true) map.renderDebug(camera, drawer);
         batch.end();
 
-        if (true) {
+        rayHandler.setCombinedMatrix(camera);
+        rayHandler.setAmbientLight(0, 0, .5f, 0.3f);
+        rayHandler.updateAndRender();
+
+        if (false) {
             debugRenderer.render(world, batch.getProjectionMatrix());
         }
     }
@@ -249,20 +262,21 @@ public class GameWorld implements Telegraph {
         switch (msg.message) {
         case Events.GAME_RESTART_REQUEST: {
             if (player == null) {
-                Events.send(Events.GAME_RESTARTING);
-                spawnPlayer();
-                spawnEnemies();
+                restart();
             }
         } break;
         case Events.PLAYER_KILLED: {
-            Async.ui(() -> {
-                Events.send(Events.GAME_RESTARTING);
-                spawnPlayer();
-                spawnEnemies();
-            }, 2);
+            Async.ui(this::restart, 2);
         } break;
         }
         return false;
+    }
+
+    protected void restart () {
+        Events.send(Events.GAME_RESTARTING);
+        spawnPlayer();
+        spawnEnemies();
+        Events.send(Events.GAME_RESTARTED);
     }
 
     private void spawnEnemies () {
@@ -317,6 +331,18 @@ public class GameWorld implements Telegraph {
         out.clear();
         for (DoorEntity door : doors) {
             if (door.doorId() == doorId) out.add(door);
+        }
+    }
+
+    public RayHandler rays () {
+        return rayHandler;
+    }
+
+    public void activateEntities (int roomId, boolean active) {
+        for (BaseEntity entity : entities) {
+            if (entity.mapId() == roomId) {
+                entity.active(active);
+            }
         }
     }
 

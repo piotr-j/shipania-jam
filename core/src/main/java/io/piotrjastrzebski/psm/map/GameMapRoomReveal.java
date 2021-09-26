@@ -1,20 +1,30 @@
 package io.piotrjastrzebski.psm.map;
 
+import com.badlogic.gdx.ai.msg.Telegram;
+import com.badlogic.gdx.ai.msg.Telegraph;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.physics.box2d.Contact;
+import io.piotrjastrzebski.psm.Events;
 import io.piotrjastrzebski.psm.GameWorld;
 import io.piotrjastrzebski.psm.entities.BaseEntity;
 import io.piotrjastrzebski.psm.entities.PlayerShipEntity;
 
-public class GameMapRoomReveal extends GameMapRoom {
+public class GameMapRoomReveal extends GameMapRoom implements Telegraph {
     boolean revealed = false;
+    public int roomId = -1;
 
     public GameMapRoomReveal (GameWorld world, int x, int y, int width, int height) {
         super(world, x, y, width, height);
+        init();
     }
 
     public GameMapRoomReveal (GameWorld world, Polygon polygon) {
         super(world, polygon);
+        init();
+    }
+
+    private void init () {
+        Events.register(this, Events.GAME_RESTARTED);
     }
 
     @Override
@@ -49,5 +59,18 @@ public class GameMapRoomReveal extends GameMapRoom {
                 }
             }
         }
+        world.activateEntities(roomId, true);
+    }
+
+    @Override
+    public boolean handleMessage (Telegram msg) {
+        switch (msg.message) {
+        case Events.GAME_RESTARTED: {
+            if (roomId >= 0) {
+                world.activateEntities(roomId, revealed);
+            }
+        } break;
+        }
+        return false;
     }
 }

@@ -20,6 +20,7 @@ public class Events {
 
     public static final int GAME_RESTART_REQUEST = 10100;
     public static final int GAME_RESTARTING = 10101;
+    public static final int GAME_RESTARTED = 10102;
 
     public final static int PF_REQUEST = 20000;
     public final static int PF_RESPONSE = 20001;

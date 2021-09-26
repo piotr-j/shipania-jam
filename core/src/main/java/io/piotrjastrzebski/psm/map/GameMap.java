@@ -159,7 +159,6 @@ public class GameMap implements IndexedGraph<GameMapTile>, Telegraph {
 //            }
 //        }
 
-        EarClippingTriangulator triangulator = new EarClippingTriangulator();
         MapLayers layers = map.getLayers();
         MapLayer helpers = layers.get("helpers");
         for (MapObject object : helpers.getObjects()) {
@@ -175,6 +174,7 @@ public class GameMap implements IndexedGraph<GameMapTile>, Telegraph {
                 if ("room-reveal".equals(type)) {
                     // add room
                     GameMapRoomReveal room = new GameMapRoomReveal(world, x, y, width, height);
+                    room.roomId = props.get("room-id", -1, Integer.class);
                     rooms.add(room);
                 } else if ("room-challenge".equals(type)) {
                     GameMapRoomChallenge room = new GameMapRoomChallenge(world, x, y, width, height);
@@ -214,8 +214,9 @@ public class GameMap implements IndexedGraph<GameMapTile>, Telegraph {
 
                 String buffType = props.get("buff-type", null, String.class);
                 int buffTier = props.get("buff-tier", 1, Integer.class);
+                int buffId = props.get("buff-id", -1, Integer.class);
                 if (buffType != null) {
-                    world.spawnBuff(cx, cy, buffType, buffTier);
+                    world.spawnBuff(buffId, cx, cy, buffType, buffTier);
                     continue;
                 }
 
@@ -224,41 +225,15 @@ public class GameMap implements IndexedGraph<GameMapTile>, Telegraph {
             if (object instanceof PolygonMapObject) {
                 PolygonMapObject mo = (PolygonMapObject)object;
                 Polygon polygon = mo.getPolygon();
-                Rectangle rect = polygon.getBoundingRectangle();
-                int x = MathUtils.floor(rect.x);
-                int y = MathUtils.floor(rect.y);
-                int width = MathUtils.ceil(rect.x + rect.width) - x;
-                int height = MathUtils.ceil(rect.y + rect.height) - y;
                 MapProperties props = mo.getProperties();
                 String type = props.get("type", null, String.class);
-                float[] vertices = polygon.getTransformedVertices();
-//                ShortArray triangles = triangulator.computeTriangles(vertices);
-//                float[] verts = new float[triangles.size * 6];
-//                int t = 0;
-//                for (int i = 0; i < triangles.size; i+=3) {
-//                    int v1 = triangles.get(i);
-//                    int v2 = triangles.get(i + 1);
-//                    int v3 = triangles.get(i + 2);
-////                    verts[t++] = x + vertices[v1];
-////                    verts[t++] = y + vertices[v1 + 1];
-////                    verts[t++] = x + vertices[v2];
-////                    verts[t++] = y + vertices[v2 + 1];
-////                    verts[t++] = x + vertices[v3];
-////                    verts[t++] = y + vertices[v3 + 1];
-//
-//                    verts[t++] = vertices[v1];
-//                    verts[t++] = vertices[v1 + 1];
-//                    verts[t++] = vertices[v2];
-//                    verts[t++] = vertices[v2 + 1];
-//                    verts[t++] = vertices[v3];
-//                    verts[t++] = vertices[v3 + 1];
-//                }
                 if ("room-reveal".equals(type)) {
                     // add room
-                    GameMapRoomReveal room = new GameMapRoomReveal(world, new Polygon(vertices));
+                    GameMapRoomReveal room = new GameMapRoomReveal(world, new Polygon(polygon.getTransformedVertices()));
+                    room.roomId = props.get("room-id", -1, Integer.class);
                     rooms.add(room);
                 } else if ("room-challenge".equals(type)) {
-                    GameMapRoomChallenge room = new GameMapRoomChallenge(world, new Polygon(vertices));
+                    GameMapRoomChallenge room = new GameMapRoomChallenge(world, new Polygon(polygon.getTransformedVertices()));
                     room.doorId = props.get("door-id", 0, Integer.class);
                     room.enemyId = props.get("enemy-id", 0, Integer.class);;
                     rooms.add(room);

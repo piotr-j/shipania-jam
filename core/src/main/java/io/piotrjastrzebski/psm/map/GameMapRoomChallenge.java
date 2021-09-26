@@ -48,7 +48,7 @@ public class GameMapRoomChallenge extends GameMapRoom implements Telegraph {
         case Events.ENTITY_KILLED: {
             if (msg.extraInfo instanceof EnemyShipEntity) {
                 EnemyShipEntity ese = (EnemyShipEntity)msg.extraInfo;
-                if (ese.enemyId == enemyId) {
+                if (ese.mapId == enemyId) {
                     aliveEnemies--;
                     Gdx.app.log(TAG, "room enemy died! " + aliveEnemies);
                     if (aliveEnemies <= 0) {
@@ -60,7 +60,7 @@ public class GameMapRoomChallenge extends GameMapRoom implements Telegraph {
         case Events.ENTITY_SPAWNED: {
             if (msg.extraInfo instanceof EnemyShipEntity) {
                 EnemyShipEntity ese = (EnemyShipEntity)msg.extraInfo;
-                if (ese.enemyId == enemyId) {
+                if (ese.mapId == enemyId) {
                     Gdx.app.log(TAG, "room enemy spawnd! " + aliveEnemies);
                     aliveEnemies ++;
                 }

@@ -1,6 +1,10 @@
 package io.piotrjastrzebski.psm.entities;
 
+import box2dLight.ChainLight;
+import box2dLight.Light;
+import box2dLight.PointLight;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.physics.box2d.*;
@@ -27,6 +31,22 @@ public class DoorEntity extends BaseEntity {
         filterData.set(filterData);
 
         fixture.setSensor(true);
+
+        float ox = width>height?1:0;
+        float oy = width<height?1:0;
+        int count = width>height?MathUtils.ceil(width):MathUtils.ceil(height);
+        for (int i = -count/2 + 1; i < count/2; i++) {
+            PointLight light = new PointLight(world.rays(), 8);
+            light.setSoft(true);
+            light.setPosition(x()  + ox * i, y() + oy * i);
+            light.setContactFilter(CATEGORY_LIGHT, (short)0, (short)(CATEGORY_WALL | CATEGORY_PLAYER));
+            light.setDistance(2);
+            light.setColor(Color.SKY);
+            light.getColor().a = .75f;
+            light.setActive(false);
+            lights.add(light);
+        }
+
     }
 
 
@@ -42,10 +62,17 @@ public class DoorEntity extends BaseEntity {
 
     public void open() {
         fixture.setSensor(true);
+        for (Light light : lights) {
+            light.setActive(false);
+        }
+
     }
 
     public void close () {
         fixture.setSensor(false);
+        for (Light light : lights) {
+            light.setActive(true);
+        }
     }
 
     public boolean isOpen () {

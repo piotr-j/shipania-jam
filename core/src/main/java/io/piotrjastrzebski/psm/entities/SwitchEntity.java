@@ -23,6 +23,12 @@ public class SwitchEntity extends SensorEntity implements Telegraph {
         PolygonShape sensorShape = new PolygonShape();
         sensorShape.setAsBox(width/2, height/2);
         fixture = body.createFixture(sensorShape, 1);
+
+        Filter filterData = fixture.getFilterData();
+        filterData.categoryBits = CATEGORY_SENSOR;
+        filterData.maskBits = CATEGORY_PLAYER;
+        fixture.setFilterData(filterData);
+
         sensorShape.dispose();
 
         fixture.setSensor(true);

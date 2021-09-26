@@ -1,8 +1,10 @@
 package io.piotrjastrzebski.psm.entities;
 
+import box2dLight.Light;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Contact;
+import com.badlogic.gdx.utils.Array;
 import com.esotericsoftware.spine.utils.TwoColorPolygonBatch;
 import io.piotrjastrzebski.psm.GameWorld;
 import io.piotrjastrzebski.psm.utils.Transform;
@@ -28,5 +30,8 @@ public abstract class MovableEntity extends BaseEntity {
 
     public void update (float dt, float alpha) {
         Utils.interpolate(start, target, alpha, current);
+        for (Light light : lights) {
+            light.setPosition(current.x(), current.y());
+        }
     }
 }

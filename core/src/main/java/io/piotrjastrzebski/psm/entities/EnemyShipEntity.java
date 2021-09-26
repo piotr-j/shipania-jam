@@ -10,7 +10,6 @@ import io.piotrjastrzebski.psm.map.GameMapTile;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
 public class EnemyShipEntity extends ShipEntity {
-    public int enemyId;
     public int tier = 1;
 
     public EnemyShipEntity (GameWorld world, float x, float y, float angle) {
@@ -40,6 +39,7 @@ public class EnemyShipEntity extends ShipEntity {
     @Override
     public void update (float dt, float alpha) {
         super.update(dt, alpha);
+        if (!active) return;
 
         // so we kinda want to attack the player
         // pathfinding will likely be needed, as straight path to player would likely fail

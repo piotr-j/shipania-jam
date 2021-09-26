@@ -20,6 +20,9 @@ public class PlayerShipEntity extends ShipEntity {
     public PlayerShipEntity (GameWorld world, float x, float y, float angle) {
         super(world, x, y, angle, true);
 
+        forwardImpulse = 10;
+        rightImpulse = 10;
+
         primaryAliveTime = .5f;
         primaryVelocity = 15;
 

@@ -1,5 +1,6 @@
 package io.piotrjastrzebski.psm.entities;
 
+import box2dLight.PointLight;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -50,7 +51,7 @@ public class ShipEntity extends MovableEntity {
 
 
         forwardImpulse = 10;
-        rightImpulse = 5;
+        rightImpulse = 10;
 
         createShipFixtures();
     }
@@ -78,6 +79,21 @@ public class ShipEntity extends MovableEntity {
         massData.mass = 1;
         massData.I = 0.16666667f;
         body.setMassData(massData);
+
+        PointLight light = new PointLight(world.rays(), 32);
+        light.setSoft(true);
+        light.setPosition(x(), y());
+        if (isPlayer) {
+            light.setContactFilter(CATEGORY_LIGHT, (short)0, (short)(CATEGORY_WALL | CATEGORY_ENEMY));
+            light.setDistance(5);
+            light.setColor(Color.GOLD);
+        } else {
+            light.setContactFilter(CATEGORY_LIGHT, (short)0, (short)(CATEGORY_WALL | CATEGORY_PLAYER));
+            light.setDistance(4);
+            light.setColor(Color.SCARLET);
+        }
+        light.getColor().a = .75f;
+        lights.add(light);
     }
 
     @Override

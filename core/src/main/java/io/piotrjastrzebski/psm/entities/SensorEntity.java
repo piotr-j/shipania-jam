@@ -16,21 +16,15 @@ public class SensorEntity extends BaseEntity {
         fixture.setSensor(true);
         sensorShape.dispose();
 
-        // TODO only player?
         Filter filterData = fixture.getFilterData();
-        //filterData.categoryBits
+        filterData.categoryBits = CATEGORY_SENSOR;
+        filterData.maskBits = CATEGORY_PLAYER;
         fixture.setFilterData(filterData);
     }
 
     public SensorEntity (GameWorld world, float x, float y, Polygon polygon) {
         super(world, x, y, 0);
 
-
-
-//        PolygonShape sensorShape = new PolygonShape();
-//        sensorShape.setAsBox(5, 5);
-//        Fixture fixture = body.createFixture(sensorShape, 1);
-//        fixture.setSensor(true);
         polygon.setPosition(-x, -y);
 
         PolygonShape sensorShape = new PolygonShape();
@@ -41,11 +35,9 @@ public class SensorEntity extends BaseEntity {
         sensorShape.dispose();
         polygon.setPosition(0, 0);
 
-        // TODO only player?
         Filter filterData = fixture.getFilterData();
         filterData.categoryBits = CATEGORY_SENSOR;
         filterData.maskBits = CATEGORY_PLAYER;
-        //filterData.categoryBits
         fixture.setFilterData(filterData);
     }
 

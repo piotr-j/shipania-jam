@@ -1,5 +1,6 @@
 package io.piotrjastrzebski.psm.entities;
 
+import box2dLight.PointLight;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.pfa.GraphPath;
 import com.badlogic.gdx.graphics.Color;
@@ -16,6 +17,8 @@ public class BossEnemyShipEntity extends EnemyShipEntity {
     public BossEnemyShipEntity (GameWorld world, float x, float y, float angle) {
         super(world, x, y, angle);
 
+
+        firePrimaryCooldown = GameWorld.WORLD_STEPS_PER_SECOND / 8;
         maxAngularVelocity = 90 * MathUtils.degRad;
 
         primaryDamage = 20;
@@ -33,8 +36,9 @@ public class BossEnemyShipEntity extends EnemyShipEntity {
         fireCooldown = 2f;
 
         primaryVelocity = 5;
+        primaryAliveTime = 10;
 
-        health(1000);
+        health(5000);
     }
 
     @Override
@@ -58,6 +62,15 @@ public class BossEnemyShipEntity extends EnemyShipEntity {
         massData.mass = 100;
         massData.I = 0.16666667f;
         body.setMassData(massData);
+
+        PointLight light = new PointLight(world.rays(), 64);
+        light.setSoft(true);
+        light.setPosition(x(), y());
+        light.setContactFilter(CATEGORY_LIGHT, (short)0, (short)(CATEGORY_WALL | CATEGORY_PLAYER));
+        light.setDistance(10);
+        light.setColor(Color.SCARLET);
+        light.getColor().a = .75f;
+        lights.add(light);
     }
 
     @Override

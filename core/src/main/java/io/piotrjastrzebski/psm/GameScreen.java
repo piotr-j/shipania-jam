@@ -66,4 +66,10 @@ public class GameScreen extends BaseScreen {
         stage.act(delta);
         stage.draw();
     }
+
+    @Override
+    public void resize (int width, int height) {
+        super.resize(width, height);
+        if (world != null) world.resize();
+    }
 }
