@@ -26,7 +26,7 @@ public class DoorEntity extends BaseEntity {
         Filter filterData = fixture.getFilterData();
         filterData.categoryBits = CATEGORY_WALL;
         filterData.maskBits = CATEGORY_PLAYER | CATEGORY_ENEMY | CATEGORY_PROJECTILE_PLAYER | CATEGORY_PROJECTILE_ENEMY;
-        filterData.set(filterData);
+        fixture.setFilterData(filterData);
 
         fixture.setSensor(true);
 
