@@ -36,6 +36,8 @@ public class PlayerShipEntity extends ShipEntity {
         //Gdx.app.log(TAG, "fps: " + Gdx.graphics.getFramesPerSecond());
         lookAt.setZero();
         // how do we do this in cleaner way?
+        moveForward = 0;
+        moveRight = 0;
         Controller current = Controllers.getCurrent();
         if (current != null) {
             ControllerMapping mapping = current.getMapping();
